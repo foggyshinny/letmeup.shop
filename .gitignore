@@ -1,0 +1,17 @@
+# 백업 파일
+**/*.backup-*.html
+**/*.bak
+**/*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 에디터/IDE
+.vscode/
+.idea/
+*.swp
+
+# 로그
+*.log

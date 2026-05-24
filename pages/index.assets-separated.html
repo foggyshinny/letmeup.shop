@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스터디카페 키오스크, 사장님 손해 본 것만 다시 설계했습니다 · 렛미업</title>
+<meta name="description" content="기존 키오스크, 바꾸고 싶어도 못 바꾸셨죠? 도입비·수수료·업데이트 — 사장님이 매달 손해 보던 것만 다시 설계한 스터디카페 키오스크. 렛미업.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f6f7f9;
+  --bg-dark: #0e1116;
+  --ink: #0e1116;
+  --ink-2: #2a2f37;
+  --ink-3: #5b626d;
+  --ink-4: #9aa1ac;
+  --line: #e6e8ec;
+  --line-2: #dde0e6;
+  --brand: #13C4D3;        /* 렛미업 메인 시안 */
+  --brand-dark: #0BA5B2;
+  --brand-soft: #E6FAFC;
+  --brand-deep: #07303B;   /* 다크 시안 (텍스트/배경용) */
+  --accent: #F5A05B;       /* 렛미업 오렌지 */
+  --accent-soft: #fff1e3;
+  --mint: #5BB948;         /* 렛미업 그린 */
+  --green: #16a34a;
+  --yellow: #f59e0b;
+  --shadow-1: 0 1px 2px rgba(14,17,22,0.04), 0 1px 0 rgba(14,17,22,0.02);
+  --shadow-2: 0 12px 32px rgba(14,17,22,0.08), 0 2px 4px rgba(14,17,22,0.04);
+  --shadow-3: 0 24px 64px rgba(14,17,22,0.12);
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --radius-xl: 32px;
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Pretendard', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.7;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: 17px;  /* 기본 16 → 17 (+1단계) */
+}
+
+/* ===== KEYWORD HIGHLIGHT SYSTEM ===== */
+.kw {
+  font-weight: 800;
+  color: var(--ink);
+}
+.kw-brand {
+  font-weight: 800;
+  color: var(--brand-dark);
+}
+.kw-accent {
+  font-weight: 800;
+  color: var(--accent);
+}
+.kw-mark {
+  font-weight: 800;
+  background: linear-gradient(180deg, transparent 60%, rgba(19,196,211,0.25) 60%, rgba(19,196,211,0.25) 92%, transparent 92%);
+  padding: 0 2px;
+}
+.kw-mark-orange {
+  font-weight: 800;
+  background: linear-gradient(180deg, transparent 60%, rgba(245,160,91,0.32) 60%, rgba(245,160,91,0.32) 92%, transparent 92%);
+  padding: 0 2px;
+}
+
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+.nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line);
+  z-index: 100;
+  height: 64px;
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 24px;
+  height: 100%; display: flex; align-items: center; justify-content: space-between;
+}
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 20px; letter-spacing: -0.03em; }
+.logo-mark {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 800; font-size: 14px;
+  font-family: var(--font-display);
+}
+.nav-cta {
+  background: var(--ink);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px; font-weight: 600;
+  transition: transform .15s ease, background .15s ease;
+}
+.nav-cta:hover { background: var(--brand); transform: translateY(-1px); }
+
+.hero {
+  padding: 140px 0 100px;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(1200px 600px at 50% -200px, rgba(19,196,211,0.10), transparent 60%),
+    linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(14,17,22,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14,17,22,0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 800px 400px at 50% 30%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 800px 400px at 50% 30%, black 30%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-inner { position: relative; text-align: center; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: white;
+  border: 1px solid var(--line);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px; font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-1);
+}
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(255,92,57,0.15); }
+
+.hero h1 {
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+  margin-bottom: 32px;
+}
+/* "지금 쓰는 키오스크" — 작게, 흐리게, 취소선만 강조 */
+.hero h1 .strike {
+  color: var(--ink-4);
+  text-decoration: line-through;
+  text-decoration-thickness: 4px;
+  text-decoration-color: var(--accent);
+  font-size: 0.55em;
+  font-weight: 700;
+  display: inline-block;
+  letter-spacing: -0.02em;
+  opacity: 0.75;
+}
+/* "바꾸고 싶어도" — 표준 크기 (선행 빌드업) */
+.hero h1 .lead {
+  display: inline-block;
+  font-size: 0.7em;
+  font-weight: 800;
+  color: var(--ink-2);
+  letter-spacing: -0.035em;
+  margin-top: 8px;
+}
+/* "못 바꾸셨죠?" — 메인 임팩트, 가장 크게 */
+.hero h1 .accent {
+  display: inline-block;
+  font-size: 1.15em;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  background: linear-gradient(120deg, var(--brand) 0%, #0BA5B2 60%, #07303B 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  padding-bottom: 8px;
+}
+/* "못 바꾸셨죠?" 밑에 시안 하이라이트 라인 */
+.hero h1 .accent::after {
+  content: '';
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: 6px;
+  height: 14px;
+  background: linear-gradient(120deg, rgba(19,196,211,0.28) 0%, rgba(19,196,211,0.18) 100%);
+  z-index: -1;
+  border-radius: 4px;
+  transform: skewX(-2deg);
+}
+/* 모바일 사이즈 ratio 조정 */
+@media (max-width: 700px) {
+  .hero h1 { font-size: clamp(42px, 12vw, 64px); }
+  .hero h1 .accent { font-size: 1.1em; }
+}
+
+.hero-sub {
+  font-size: clamp(17px, 1.5vw, 21px);
+  color: var(--ink-2);
+  max-width: 720px;
+  margin: 0 auto 44px;
+  line-height: 1.65;
+}
+.hero-sub strong { color: var(--ink); font-weight: 700; }
+
+.cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 56px; }
+.btn {
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-size: 16px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all .2s ease;
+  letter-spacing: -0.01em;
+}
+.btn-primary {
+  background: var(--ink);
+  color: white;
+  box-shadow: 0 8px 24px rgba(14,17,22,0.18);
+}
+.btn-primary:hover { background: var(--brand); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(19,196,211,0.35); }
+.btn-secondary {
+  background: white;
+  color: var(--ink);
+  border: 1px solid var(--line-2);
+}
+.btn-secondary:hover { border-color: var(--ink); transform: translateY(-2px); }
+.btn-arrow { display: inline-block; transition: transform .2s ease; }
+.btn:hover .btn-arrow { transform: translateX(4px); }
+
+.proof-strip {
+  display: flex; align-items: center; justify-content: center; gap: 28px;
+  flex-wrap: wrap;
+  padding-top: 40px;
+  border-top: 1px solid var(--line);
+  max-width: 720px;
+  margin: 0 auto;
+}
+.proof-item { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink-2); font-weight: 500; }
+.proof-item strong { color: var(--ink); font-weight: 800; }
+.proof-divider { width: 1px; height: 16px; background: var(--line-2); }
+
+.stats {
+  padding: 80px 0;
+  background: var(--bg-dark);
+  color: white;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+.stat-item { text-align: left; padding: 24px 0; }
+.stat-num {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  background: linear-gradient(135deg, #ffffff 0%, #4DDDE9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+.stat-label { font-size: 15px; color: rgba(255,255,255,0.7); font-weight: 500; }
+.stat-label strong { color: white; font-weight: 700; }
+
+.section { padding: 120px 0; }
+.section-tag {
+  display: inline-block;
+  font-size: 13px; font-weight: 800;
+  color: var(--brand-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  font-family: var(--font-display);
+  padding: 8px 16px;
+  background: rgba(19,196,211,0.12);
+  border-radius: 999px;
+}
+.section-title {
+  font-size: clamp(34px, 5vw, 58px);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  margin-bottom: 22px;
+  color: var(--ink);
+}
+.section-sub {
+  font-size: clamp(16px, 1.35vw, 20px);
+  color: var(--ink-2);
+  max-width: 700px;
+  line-height: 1.7;
+}
+.section-head { margin-bottom: 64px; }
+.section-head.center { text-align: center; }
+.section-head.center .section-sub { margin: 0 auto; }
+
+.problems { background: var(--bg-soft); }
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.problem-card {
+  background: white;
+  border-radius: var(--radius-l);
+  padding: 36px;
+  border: 1px solid var(--line);
+  display: flex; gap: 24px;
+  align-items: flex-start;
+  transition: all .2s ease;
+}
+.problem-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); border-color: transparent; }
+.problem-num {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 900;
+  color: var(--brand-dark);
+  line-height: 1;
+  flex-shrink: 0;
+  letter-spacing: -0.03em;
+}
+.problem-content h3 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+.problem-content p {
+  font-size: 16px;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+.problem-quote {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 14px;
+  background: var(--bg-soft);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.compare { background: white; }
+.compare-card {
+  background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+  border-radius: var(--radius-xl);
+  padding: 80px 60px;
+  border: 1px solid var(--line);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.compare-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -20%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(19,196,211,0.10), transparent 70%);
+  pointer-events: none;
+}
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 40px;
+  align-items: center;
+  margin-top: 48px;
+  position: relative;
+}
+.compare-col {
+  background: white;
+  border-radius: var(--radius-l);
+  padding: 40px 32px;
+  border: 1px solid var(--line);
+}
+.compare-col.bad .compare-label { color: var(--accent); }
+.compare-col.good {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: white;
+  position: relative;
+  transform: scale(1.05);
+  box-shadow: 0 24px 64px rgba(14,17,22,0.2);
+}
+.compare-col.good .compare-label { color: #8ab0ff; }
+.compare-label {
+  font-size: 18px; font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  margin-bottom: 18px;
+  font-family: var(--font-sans);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+}
+.compare-col.good .compare-label {
+  background: rgba(19,196,211,0.15);
+  color: #5DE0EC;
+}
+.compare-col h4 {
+  font-size: 20px; font-weight: 800;
+  margin-bottom: 28px;
+  margin-top: 4px;
+  letter-spacing: -0.02em;
+}
+/* compare-col h4 정의는 compare-label CSS 아래로 통합됨 */
+.compare-items { text-align: left; }
+.compare-item {
+  display: flex; justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 16px;
+}
+.compare-col.good .compare-item { border-color: rgba(255,255,255,0.1); }
+.compare-item:last-child { border-bottom: none; }
+.compare-item-label { color: var(--ink-3); }
+.compare-col.good .compare-item-label { color: rgba(255,255,255,0.6); }
+.compare-item-value { font-weight: 800; color: var(--ink); font-size: 16px; }
+.compare-col.good .compare-item-value { color: white; }
+.compare-item-value.zero { color: var(--green); font-weight: 900; font-size: 17px; }
+.compare-vs {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink-4);
+  letter-spacing: -0.04em;
+}
+
+.pillars { background: var(--bg-soft); }
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.pillar-card {
+  background: white;
+  border-radius: var(--radius-l);
+  padding: 40px 32px;
+  border: 1px solid var(--line);
+  transition: all .25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.pillar-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-2); }
+.pillar-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: var(--brand-soft);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  font-size: 28px;
+}
+.pillar-card h3 {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+.pillar-card p {
+  font-size: 16px;
+  color: var(--ink-2);
+  line-height: 1.7;
+  margin-bottom: 22px;
+}
+.pillar-tag {
+  display: inline-block;
+  padding: 8px 14px;
+  background: var(--bg-soft);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.features { background: white; }
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+.feature-card {
+  background: var(--bg-soft);
+  border-radius: var(--radius-l);
+  padding: 40px;
+  border: 1px solid transparent;
+  transition: all .25s ease;
+}
+.feature-card:hover { background: white; border-color: var(--line); box-shadow: var(--shadow-2); }
+.feature-card.feature-hero {
+  grid-column: span 2;
+  background: var(--ink);
+  color: white;
+  padding: 56px;
+  position: relative;
+  overflow: hidden;
+}
+.feature-card.feature-hero::after {
+  content: '';
+  position: absolute;
+  right: -100px; bottom: -100px;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(19,196,211,0.32), transparent 70%);
+  pointer-events: none;
+}
+.feature-card.feature-hero h3 { color: white; }
+.feature-card.feature-hero p { color: rgba(255,255,255,0.7); }
+
+.feature-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: white;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  font-size: 24px;
+  box-shadow: var(--shadow-1);
+}
+.feature-card.feature-hero .feature-icon { background: rgba(255,255,255,0.1); }
+
+.feature-card h3 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+}
+.feature-card.feature-hero h3 { font-size: 34px; margin-bottom: 18px; line-height: 1.2; }
+.feature-card p {
+  font-size: 16px;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+.feature-card.feature-hero p { font-size: 18px; line-height: 1.7; max-width: 580px; }
+
+.feature-list {
+  margin-top: 24px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.feature-tag {
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.testimonials { background: var(--bg-soft); }
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.testimonial-card {
+  background: white;
+  border-radius: var(--radius-l);
+  padding: 32px;
+  border: 1px solid var(--line);
+  display: flex; flex-direction: column;
+}
+.testimonial-stars { color: var(--yellow); margin-bottom: 16px; font-size: 14px; letter-spacing: 2px; }
+.testimonial-headline {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  color: var(--ink);
+  line-height: 1.4;
+}
+.testimonial-body {
+  font-size: 15px;
+  color: var(--ink-2);
+  line-height: 1.75;
+  margin-bottom: 26px;
+  flex: 1;
+}
+.testimonial-author {
+  display: flex; align-items: center; gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.author-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+.author-info { font-size: 13px; }
+.author-name { font-weight: 700; color: var(--ink); }
+.author-meta { color: var(--ink-4); margin-top: 2px; }
+
+.process { background: white; }
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  position: relative;
+}
+.process-step {
+  background: var(--bg-soft);
+  border-radius: var(--radius-l);
+  padding: 40px 32px;
+  position: relative;
+}
+.process-num {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--brand);
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+.process-step h3 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin-bottom: 12px;
+  line-height: 1.25;
+}
+.process-step p {
+  font-size: 16px;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+
+.faq { background: var(--bg-soft); }
+.faq-list { max-width: 800px; margin: 0 auto; }
+.faq-item {
+  background: white;
+  border-radius: var(--radius-m);
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  transition: border-color .2s ease;
+}
+.faq-item:hover { border-color: var(--line-2); }
+.faq-q {
+  width: 100%;
+  text-align: left;
+  padding: 26px 30px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px;
+  letter-spacing: -0.015em;
+  line-height: 1.4;
+}
+.faq-toggle {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--bg-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  color: var(--ink-3);
+  transition: transform .25s ease, background .2s ease;
+  flex-shrink: 0;
+}
+.faq-item.open .faq-toggle { transform: rotate(45deg); background: var(--brand); color: white; }
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .3s ease;
+}
+.faq-item.open .faq-a { max-height: 400px; }
+.faq-a-inner {
+  padding: 0 30px 26px;
+  font-size: 16px;
+  color: var(--ink-2);
+  line-height: 1.8;
+}
+
+.final-cta {
+  background: var(--bg-dark);
+  color: white;
+  padding: 120px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.final-cta::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(19,196,211,0.22), transparent 60%);
+  pointer-events: none;
+}
+.final-cta-inner { position: relative; }
+.final-cta .badge {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.85);
+}
+.final-cta h2 {
+  font-size: clamp(40px, 5.5vw, 68px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+.final-cta h2 .accent {
+  background: linear-gradient(120deg, #4DDDE9 0%, #ffffff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.final-cta p {
+  font-size: 19px;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 44px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.65;
+}
+.final-cta .btn-primary {
+  background: white;
+  color: var(--ink);
+}
+.final-cta .btn-primary:hover { background: var(--brand); color: white; }
+.final-cta .btn-secondary {
+  background: transparent;
+  border-color: rgba(255,255,255,0.2);
+  color: white;
+}
+.final-cta .btn-secondary:hover { border-color: white; }
+
+.footer {
+  background: var(--ink);
+  color: rgba(255,255,255,0.5);
+  padding: 64px 0 40px;
+  font-size: 13px;
+  line-height: 1.7;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.footer-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+.footer-brand { color: white; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
+.footer-tel { color: rgba(255,255,255,0.85); font-weight: 600; font-size: 18px; }
+.footer-info { font-size: 12px; }
+.footer-info p { margin-bottom: 4px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp .8s ease both; }
+.fade-up-d1 { animation: fadeUp .8s ease .1s both; }
+.fade-up-d2 { animation: fadeUp .8s ease .2s both; }
+.fade-up-d3 { animation: fadeUp .8s ease .3s both; }
+
+@media (max-width: 900px) {
+  .section { padding: 80px 0; }
+  .hero { padding: 110px 0 70px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .compare-row { grid-template-columns: 1fr; gap: 16px; }
+  .compare-col.good { transform: none; }
+  .compare-vs { padding: 8px 0; }
+  .compare-card { padding: 48px 24px; }
+  .pillar-grid { grid-template-columns: 1fr; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .feature-card.feature-hero { grid-column: span 1; padding: 40px 28px; }
+  .feature-card { padding: 32px 28px; }
+  .testimonial-grid { grid-template-columns: 1fr; }
+  .process-grid { grid-template-columns: 1fr; }
+  .proof-strip { gap: 16px; }
+  .proof-divider { display: none; }
+  .nav-cta { padding: 8px 14px; font-size: 13px; }
+}
+
+/* ===== HERO IMAGE LAYOUT ===== */
+.hero { padding: 130px 0 80px; }
+.hero-inner { text-align: left; }
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1.2fr;
+  gap: 60px;
+  align-items: center;
+}
+.hero-left .badge { margin-bottom: 24px; }
+.hero h1 { margin-bottom: 24px; }
+.hero-sub { margin: 0 0 36px; }
+.hero .cta-row { justify-content: flex-start; margin-bottom: 36px; }
+.hero .proof-strip { justify-content: flex-start; max-width: none; }
+
+.hero-visual {
+  position: relative;
+  padding: 20px;
+}
+.hero-visual-main {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(14,17,22,0.18), 0 8px 24px rgba(14,17,22,0.08);
+  border: 1px solid var(--line);
+  transform: perspective(1200px) rotateY(-6deg) rotateX(2deg);
+  transition: transform .5s ease;
+}
+.hero-visual:hover .hero-visual-main {
+  transform: perspective(1200px) rotateY(-3deg) rotateX(1deg);
+}
+.hero-visual-main img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.hero-visual-overlay {
+  position: absolute;
+  bottom: -10px;
+  right: -20px;
+  background: white;
+  border-radius: 14px;
+  padding: 14px 20px;
+  box-shadow: 0 12px 32px rgba(14,17,22,0.14);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+.hero-visual-overlay-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 4px rgba(22,163,74,0.15);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.15); }
+}
+.hero-visual-overlay-text {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.hero-visual-overlay-text span { color: var(--ink-3); font-weight: 500; }
+.hero-visual-caption {
+  position: absolute;
+  top: -8px;
+  left: -10px;
+  background: var(--ink);
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+  box-shadow: 0 8px 20px rgba(14,17,22,0.25);
+}
+
+/* Features 이미지 카드 */
+.feature-image {
+  margin-top: 28px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: white;
+  box-shadow: var(--shadow-1);
+}
+.feature-image img { display: block; width: 100%; height: auto; }
+
+.feature-card.feature-hero .feature-image {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* Side-by-side feature with image */
+.feature-showcase {
+  background: var(--bg-soft);
+  border-radius: var(--radius-xl);
+  padding: 60px;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 48px;
+  align-items: center;
+  margin-bottom: 24px;
+  border: 1px solid var(--line);
+}
+.feature-showcase.reverse { grid-template-columns: 1.1fr 1fr; }
+.feature-showcase.reverse .feature-showcase-text { order: 2; }
+.feature-showcase.reverse .feature-showcase-img { order: 1; }
+.feature-showcase-text .feature-icon { background: white; box-shadow: var(--shadow-1); }
+.feature-showcase-text h3 {
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 18px;
+  line-height: 1.18;
+}
+.feature-showcase-text p {
+  font-size: 17px;
+  color: var(--ink-2);
+  line-height: 1.72;
+  margin-bottom: 26px;
+}
+.feature-showcase-img {
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  background: white;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-2);
+  position: relative;
+}
+.feature-showcase-img img { display: block; width: 100%; height: auto; }
+.feature-showcase-tag {
+  display: inline-block;
+  font-size: 13px; font-weight: 800;
+  color: var(--brand-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  font-family: var(--font-display);
+  padding: 6px 12px;
+  background: rgba(19,196,211,0.12);
+  border-radius: 999px;
+}
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 50px; }
+  .hero-inner { text-align: center; }
+  .hero .cta-row { justify-content: center; }
+  .hero .proof-strip { justify-content: center; }
+  .hero-visual { padding: 10px; }
+  .hero-visual-main { transform: none; }
+  .hero-visual-overlay { right: 10px; bottom: -5px; padding: 10px 14px; font-size: 12px; }
+  .hero-visual-caption { font-size: 11px; padding: 6px 12px; }
+  .feature-showcase {
+    grid-template-columns: 1fr;
+    padding: 36px 28px;
+    gap: 32px;
+  }
+  .feature-showcase.reverse { grid-template-columns: 1fr; }
+  .feature-showcase.reverse .feature-showcase-text { order: 1; }
+  .feature-showcase.reverse .feature-showcase-img { order: 2; }
+  .feature-showcase-text h3 { font-size: 24px; }
+}
+
+
+/* ===== BRAND LOGO ===== */
+.logo-img { height: 22px; width: auto; display: block; }
+.footer-logo-img { height: 28px; width: auto; display: block; filter: brightness(0) invert(1); margin-bottom: 12px; }
+
+/* ===== SVG ICON CARDS (LETMEUP STYLE) ===== */
+.svg-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 20px rgba(14,17,22,0.08);
+  background-size: 80% 80%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.svg-icon.cyan { background-color: var(--brand); }
+.svg-icon.orange { background-color: var(--accent); }
+.svg-icon.green { background-color: var(--mint); }
+.svg-icon.deep { background-color: var(--brand-deep); }
+
+/* Letmeup 풍 원형 아이콘 (cushion) */
+.brand-icon {
+  width: 64px; height: 64px;
+  border-radius: 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 24px rgba(14,17,22,0.1);
+  position: relative;
+  overflow: hidden;
+}
+.brand-icon::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0) 50%);
+  pointer-events: none;
+}
+.brand-icon img { width: 70%; height: 70%; object-fit: contain; position: relative; z-index: 1; }
+.brand-icon.cyan { background: linear-gradient(135deg, #1FD2E2 0%, #0FA9B6 100%); }
+.brand-icon.orange { background: linear-gradient(135deg, #FAB575 0%, #EA8A40 100%); }
+.brand-icon.green { background: linear-gradient(135deg, #71CE5C 0%, #4AA239 100%); }
+.brand-icon.deep { background: linear-gradient(135deg, #1A4655 0%, #07303B 100%); }
+
+/* Hero badge dot 색상 */
+.badge-dot { background: var(--brand); box-shadow: 0 0 0 4px rgba(19,196,211,0.18); }
+
+/* Section tag (CYAN) */
+.section-tag { color: var(--brand-dark); }
+
+/* Pillar icon 새 디자인 */
+.pillars .pillar-card .pillar-icon-wrap { margin-bottom: 24px; }
+
+/* Process num color */
+.process-num { color: var(--brand-dark); }
+
+/* Feature showcase tag */
+.feature-showcase-tag { color: var(--brand-dark); }
+
+/* Author avatar */
+.author-avatar { background: var(--brand-soft); color: var(--brand-dark); }
+
+/* Compare good col label */
+.compare-col.good .compare-label { color: #5DE0EC; }
+
+/* Hero h1 strike */
+.hero h1 .strike { text-decoration-color: var(--accent); }
+
+/* Stat num color (다크 위에서 - 더 시안틱하게) */
+.stat-num {
+  background: linear-gradient(135deg, #ffffff 0%, #5DE0EC 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* feature-hero h3 그라데이션 텍스트 */
+.feature-card.feature-hero h3 {
+  background: linear-gradient(120deg, #ffffff 0%, #5DE0EC 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+
+.proof-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; vertical-align: middle; box-shadow: 0 0 0 3px rgba(0,0,0,0.04); }
+
+
+/* ===== HOW TO ADOPT (3 옵션) ===== */
+.adopt { background: white; }
+.adopt-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 16px;
+}
+.adopt-card {
+  background: white;
+  border-radius: var(--radius-l);
+  border: 1px solid var(--line);
+  padding: 36px 32px;
+  position: relative;
+  transition: all .25s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.adopt-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-3);
+  border-color: transparent;
+}
+.adopt-card.recommended {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+  transform: scale(1.03);
+  box-shadow: 0 24px 60px rgba(14,17,22,0.2);
+}
+.adopt-card.recommended:hover {
+  transform: scale(1.03) translateY(-8px);
+}
+.adopt-card.recommended::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -30%;
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(19,196,211,0.25), transparent 60%);
+  pointer-events: none;
+}
+.adopt-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--brand);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+  font-family: var(--font-display);
+  box-shadow: 0 4px 12px rgba(19,196,211,0.4);
+  z-index: 2;
+}
+.adopt-num {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--brand-dark);
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+.adopt-card.recommended .adopt-num {
+  color: #5DE0EC;
+}
+.adopt-visual {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: var(--radius-m);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+}
+.adopt-card.recommended .adopt-visual {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.08);
+}
+.adopt-visual-icon {
+  width: 90px; height: 90px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 14px 28px rgba(14,17,22,0.16);
+}
+.adopt-visual-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0) 50%);
+  pointer-events: none;
+}
+.adopt-visual-icon img {
+  width: 60%; height: 60%; object-fit: contain;
+  position: relative; z-index: 1;
+}
+.adopt-visual-icon.orange { background: linear-gradient(135deg, #FAB575 0%, #EA8A40 100%); }
+.adopt-visual-icon.cyan { background: linear-gradient(135deg, #1FD2E2 0%, #0FA9B6 100%); }
+.adopt-visual-icon.deep { background: linear-gradient(135deg, #1A4655 0%, #07303B 100%); }
+
+.adopt-title {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 14px;
+  line-height: 1.22;
+  position: relative;
+  z-index: 1;
+}
+.adopt-desc {
+  font-size: 15px;
+  color: var(--ink-2);
+  line-height: 1.7;
+  margin-bottom: 26px;
+  position: relative;
+  z-index: 1;
+}
+.adopt-card.recommended .adopt-desc {
+  color: rgba(255,255,255,0.7);
+}
+.adopt-divider {
+  height: 1px;
+  background: var(--line);
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+.adopt-card.recommended .adopt-divider {
+  background: rgba(255,255,255,0.1);
+}
+.adopt-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+  position: relative;
+  z-index: 1;
+}
+.adopt-features li {
+  font-size: 15px;
+  color: var(--ink);
+  padding: 8px 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.55;
+  font-weight: 500;
+}
+.adopt-card.recommended .adopt-features li {
+  color: rgba(255,255,255,0.85);
+}
+.adopt-features li::before {
+  content: '✓';
+  color: var(--brand-dark);
+  font-weight: 800;
+  flex-shrink: 0;
+  font-size: 13px;
+  width: 16px;
+  margin-top: 2px;
+}
+.adopt-card.recommended .adopt-features li::before {
+  color: #5DE0EC;
+}
+.adopt-meta {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--ink-3);
+  position: relative;
+  z-index: 1;
+}
+.adopt-card.recommended .adopt-meta {
+  border-color: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6);
+}
+.adopt-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.adopt-meta-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+.adopt-meta-value {
+  font-weight: 800;
+  color: var(--ink);
+  font-size: 14px;
+}
+.adopt-card.recommended .adopt-meta-value { color: white; }
+
+@media (max-width: 900px) {
+  .adopt-grid { grid-template-columns: 1fr; gap: 16px; }
+  .adopt-card.recommended { transform: none; }
+  .adopt-card.recommended:hover { transform: translateY(-4px); }
+}
+
+
+/* ===== FLOATING CTA ===== */
+.float-cta {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.float-bubble {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  box-shadow: var(--shadow-2);
+  position: relative;
+  animation: bubbleIn .6s ease both;
+  animation-delay: 1s;
+  opacity: 0;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+}
+.float-bubble strong { color: var(--brand-dark); font-weight: 800; }
+.float-bubble::after {
+  content: '';
+  position: absolute;
+  right: 28px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translateY(8px) scale(.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.float-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.float-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 12px 32px rgba(14,17,22,0.18), 0 4px 12px rgba(14,17,22,0.08);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.float-btn-primary {
+  background: var(--ink);
+  color: white;
+}
+.float-btn-primary:hover {
+  background: var(--brand);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(19,196,211,0.4);
+}
+.float-btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transition: left .6s ease;
+}
+.float-btn-primary:hover::before { left: 100%; }
+
+.float-btn-secondary {
+  background: white;
+  color: var(--ink);
+  border: 1px solid var(--line-2);
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  justify-content: center;
+  font-size: 22px;
+}
+.float-btn-secondary:hover {
+  transform: translateY(-3px) scale(1.05);
+  border-color: var(--brand);
+  color: var(--brand-dark);
+}
+
+.float-pulse {
+  position: relative;
+}
+.float-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--ink);
+  z-index: -1;
+  animation: pulseRing 2.2s ease-out infinite;
+}
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* 스크롤 다운하면 좀 더 prominent */
+.float-cta.scrolled .float-bubble {
+  animation: bubbleIn .6s ease both;
+}
+
+/* 모바일: 풀폭 바 */
+@media (max-width: 700px) {
+  .float-cta {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 30%, rgba(255,255,255,1) 100%);
+    flex-direction: row;
+    align-items: stretch;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .float-bubble { display: none; }
+  .float-buttons {
+    width: 100%;
+    gap: 8px;
+  }
+  .float-btn-primary {
+    flex: 1;
+    justify-content: center;
+    padding: 14px 20px;
+    font-size: 15px;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(14,17,22,0.18);
+  }
+  .float-btn-secondary {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  /* footer 가려지지 않게 body padding */
+  body { padding-bottom: 72px; }
+  /* pulse는 모바일에서 약하게 */
+  .float-pulse::after { display: none; }
+}
+
+.float-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+}
+
+
+/* stat 단위 */
+.stat-unit {
+  font-family: var(--font-display);
+  font-size: 0.5em;
+  font-weight: 700;
+  margin-left: 8px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(93,224,236,0.7) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  vertical-align: middle;
+  letter-spacing: -0.02em;
+}
+.stat-count {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+
+/* ===== BEFORE / AFTER VISUAL ===== */
+.ba-visual {
+  margin: 0 auto 56px;
+  max-width: 900px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(14,17,22,0.18), 0 8px 24px rgba(14,17,22,0.06);
+  border: 1px solid var(--line);
+  position: relative;
+}
+.ba-svg-wrap {
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+.ba-svg-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* SVG 내부 sparkle 애니메이션 */
+.ba-svg-wrap svg g[fill="#13C4D3"] circle {
+  animation: sparkleFloat 3s ease-in-out infinite;
+}
+.ba-svg-wrap svg g[fill="#13C4D3"] circle:nth-child(2) { animation-delay: 0.4s; }
+.ba-svg-wrap svg g[fill="#13C4D3"] circle:nth-child(3) { animation-delay: 0.8s; }
+.ba-svg-wrap svg g[fill="#13C4D3"] circle:nth-child(4) { animation-delay: 1.2s; }
+.ba-svg-wrap svg g[fill="#13C4D3"] circle:nth-child(5) { animation-delay: 1.6s; }
+
+@keyframes sparkleFloat {
+  0%, 100% { opacity: 0.3; transform: translateY(0) scale(1); }
+  50% { opacity: 1; transform: translateY(-4px) scale(1.2); }
+}
+
+@media (max-width: 700px) {
+  .ba-visual { margin-bottom: 36px; border-radius: var(--radius-l); }
+}
+
+.ba-svg-wrap .spk {
+  animation: spkPulse 2.6s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+.ba-svg-wrap .spk:nth-of-type(2) { animation-delay: .3s; }
+.ba-svg-wrap .spk:nth-of-type(3) { animation-delay: .6s; }
+.ba-svg-wrap .spk:nth-of-type(4) { animation-delay: .9s; }
+.ba-svg-wrap .spk:nth-of-type(5) { animation-delay: 1.2s; }
+@keyframes spkPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* 0원 배지 펄스 */
+@keyframes badgePulse {
+  0%, 100% { transform: translate(810px, 120px) scale(1); }
+  50% { transform: translate(810px, 120px) scale(1.06); }
+}
+.ba-svg-wrap svg > g[transform="translate(810, 120)"] {
+  transform-origin: 810px 120px;
+  animation: badgeBeat 2.4s ease-in-out infinite;
+}
+@keyframes badgeBeat {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(0,0) scale(1.05); }
+}
+
+
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <img src="./assets/logo-letmeup.svg" alt="렛미업" class="logo-img">
+    </a>
+    <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="nav-cta">무료 상담 받기 →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="badge fade-up">
+          <span class="badge-dot"></span>
+          <span>스터디카페 사장님을 위한 무인 키오스크</span>
+        </div>
+        <h1 class="fade-up-d1">
+          <span class="strike">지금 쓰는 키오스크,</span><br>
+          <span class="lead">바꾸고 싶어도</span><br>
+          <span class="accent">못 바꾸셨죠?</span>
+        </h1>
+        <p class="hero-sub fade-up-d2">
+          <strong>도입비·결제 수수료·업데이트</strong> —<br>
+          사장님이 매달 손해 보던 것만 처음부터 다시 설계했습니다.
+        </p>
+        <div class="cta-row fade-up-d3">
+          <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="btn btn-primary">무료 상담 받기 <span class="btn-arrow">→</span></a>
+          <a href="#compare" class="btn btn-secondary">비용 비교 보기</a>
+        </div>
+        <div class="proof-strip fade-up-d3">
+          <div class="proof-item"><span class="proof-dot" style="background:var(--brand);"></span><strong>도입비 0원</strong>으로 시작</div>
+          <div class="proof-divider"></div>
+          <div class="proof-item"><span class="proof-dot" style="background:var(--accent);"></span><strong>업계 최저</strong> 결제 수수료</div>
+          <div class="proof-divider"></div>
+          <div class="proof-item"><span class="proof-dot" style="background:var(--mint);"></span><strong>매달 새로워지는</strong> 시스템</div>
+        </div>
+      </div>
+      <div class="hero-right fade-up-d2">
+        <div class="hero-visual">
+          <div class="hero-visual-caption">사장님이 매일 볼 화면</div>
+          <div class="hero-visual-main">
+            <img src="./assets/admin-payment.webp" alt="렛미업 관리자 웹 - 결제 내역 대시보드">
+          </div>
+          <div class="hero-visual-overlay">
+            <span class="hero-visual-overlay-dot"></span>
+            <span class="hero-visual-overlay-text"><span>실시간</span> 매출 처리 중</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats" id="statsSection">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-num"><span class="stat-count" data-target="120" data-duration="2000">0</span><span class="stat-unit">억</span></div>
+        <div class="stat-label">누적 <strong>결제 거래액</strong></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span class="stat-count" data-target="12" data-duration="2000">0</span><span class="stat-unit">만 명</span></div>
+        <div class="stat-label">누적 <strong>이용 회원</strong></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span class="stat-count" data-target="360" data-duration="2200">0</span><span class="stat-unit">대</span></div>
+        <div class="stat-label">설치 운영 <strong>키오스크</strong></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num"><span class="stat-count" data-target="1825" data-duration="2500">0</span><span class="stat-unit">일</span></div>
+        <div class="stat-label">무인 운영 <strong>안정 가동</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section problems">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">The Problem</span>
+      <h2 class="section-title">사장님, 혹시 이런<br>고민 있으셨나요?</h2>
+      <p class="section-sub">스터디카페 사장님이라면 한 번쯤 겪어봤을 <span class="kw">4가지 답답함</span>.<br>렛미업은 여기서부터 시작했습니다.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-num">01</div>
+        <div class="problem-content">
+          <h3>"지금 키오스크, 솔직히 마음에 안 들어요"</h3>
+          <p>오류는 잦고, 회원은 불편하다 하고, 결제는 자꾸 막힙니다. 바꿔야 한다는 건 아는데, 막상 알아보면 새 키오스크 값에 손이 떨립니다.</p>
+          <div class="problem-quote">💬 "쓸 때마다 답답한데, 바꾸자니 또 돈"</div>
+        </div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-num">02</div>
+        <div class="problem-content">
+          <h3>"PG·VAN 수수료가 너무 비싸요"</h3>
+          <p>매달 결제 수수료로 빠져나가는 돈, 합치면 적지 않습니다. 그런데 어디로, 왜 그만큼 나가는지 명세서를 봐도 모르겠습니다.</p>
+          <div class="problem-quote">💬 "수수료만 줄여도 한 달 공과금"</div>
+        </div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-num">03</div>
+        <div class="problem-content">
+          <h3>"시스템이 1년째 그대로예요"</h3>
+          <p>업데이트도 없고, 새 기능 요청하면 견적부터 받으라고 합니다. 옆 카페는 얼굴인식이라는데, 우리만 옛날 그대로입니다.</p>
+          <div class="problem-quote">💬 "업체에 전화해도 답이 없어요"</div>
+        </div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-num">04</div>
+        <div class="problem-content">
+          <h3>"교체 비용이 부담돼서 못 바꿔요"</h3>
+          <p>새 키오스크 한 대 사려면 ···만 원. 두 대면 두 배. 회원관리 프로그램은 또 따로. 결국 "그냥 쓰자"로 끝납니다.</p>
+          <div class="problem-quote">💬 "지금 쓰는 게 아까워서 못 버립니다"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section compare" id="compare">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">Cost Comparison</span>
+      <h2 class="section-title">키오스크 업그레이드<br><span style="background:linear-gradient(120deg, var(--brand) 0%, #4DDDE9 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">0원으로 도입하세요.</span></h2>
+      <p class="section-sub"><span class="kw">도입비를 받지 않습니다.</span><br>부담없이 새롭게 시작하세요.<br>이제 다시 시작입니다.</p>
+    </div>
+    <!-- Before / After Visual -->
+    <div class="ba-visual">
+      <div class="ba-svg-wrap">
+        <svg viewBox="0 0 900 540" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;">
+  <defs>
+    <linearGradient id="bgL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1d23"/>
+      <stop offset="1" stop-color="#0a0c10"/>
+    </linearGradient>
+    <linearGradient id="bgR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0f9fb"/>
+      <stop offset="1" stop-color="#dbf5f8"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#13C4D3" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#13C4D3" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="kioFrameOld" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3a3a"/>
+      <stop offset="1" stop-color="#1a1a1a"/>
+    </linearGradient>
+    <linearGradient id="kioFrameNew" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#222"/>
+      <stop offset="1" stop-color="#000"/>
+    </linearGradient>
+    <linearGradient id="screenOld" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3a3a"/>
+      <stop offset="1" stop-color="#222"/>
+    </linearGradient>
+    <linearGradient id="screenNew" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f0f9fb"/>
+    </linearGradient>
+    <linearGradient id="cyanBtn" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1FD2E2"/>
+      <stop offset="1" stop-color="#0FA9B6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="450" height="540" fill="url(#bgL)"/>
+  <rect x="450" width="450" height="540" fill="url(#bgR)"/>
+
+  <!-- 우측 글로우 -->
+  <circle cx="675" cy="280" r="260" fill="url(#glow)"/>
+
+  <!-- 라벨 -->
+  <g>
+    <rect x="40" y="40" width="100" height="28" rx="14" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+    <text x="90" y="58" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="800" fill="#9aa1ac" letter-spacing="2">BEFORE</text>
+  </g>
+  <g>
+    <rect x="760" y="40" width="100" height="28" rx="14" fill="#13C4D3"/>
+    <text x="810" y="58" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="11" font-weight="800" fill="white" letter-spacing="2">AFTER</text>
+  </g>
+
+  <!-- ========== 좌측: 낡은 흑백 키오스크 ========== -->
+  <!-- 받침 그림자 -->
+  <ellipse cx="225" cy="460" rx="120" ry="12" fill="rgba(0,0,0,0.5)"/>
+  <!-- 받침 -->
+  <rect x="135" y="425" width="180" height="20" rx="3" fill="url(#kioFrameOld)"/>
+  <rect x="195" y="350" width="60" height="80" fill="url(#kioFrameOld)"/>
+  <!-- 본체 -->
+  <rect x="120" y="100" width="210" height="260" rx="8" fill="url(#kioFrameOld)" stroke="#0a0a0a" stroke-width="2"/>
+  <!-- 화면 -->
+  <rect x="138" y="118" width="174" height="224" rx="4" fill="url(#screenOld)"/>
+
+  <!-- 화면 내부 (회색조 죽은 UI) -->
+  <rect x="150" y="130" width="150" height="14" rx="2" fill="#4a4a4a" opacity="0.7"/>
+  <rect x="150" y="152" width="80" height="8" rx="2" fill="#3a3a3a" opacity="0.6"/>
+
+  <rect x="150" y="170" width="68" height="44" rx="3" fill="#2a2a2a" stroke="#3a3a3a"/>
+  <rect x="232" y="170" width="68" height="44" rx="3" fill="#2a2a2a" stroke="#3a3a3a"/>
+  <rect x="150" y="222" width="150" height="40" rx="3" fill="#262626" stroke="#363636"/>
+  <rect x="150" y="270" width="44" height="22" rx="2" fill="#2a2a2a"/>
+  <rect x="202" y="270" width="44" height="22" rx="2" fill="#2a2a2a"/>
+  <rect x="254" y="270" width="46" height="22" rx="2" fill="#2a2a2a"/>
+  <rect x="150" y="300" width="150" height="30" rx="2" fill="#262626"/>
+
+  <!-- 균열 (crack) -->
+  <path d="M 175 118 L 195 180 L 165 240 L 200 290 L 180 340" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" fill="none"/>
+  <path d="M 195 180 L 240 200" stroke="rgba(255,255,255,0.14)" stroke-width="1" fill="none"/>
+  <path d="M 200 290 L 250 310" stroke="rgba(255,255,255,0.1)" stroke-width="1" fill="none"/>
+
+  <!-- 거미줄 코너 -->
+  <g stroke="rgba(200,200,200,0.2)" stroke-width="0.8" fill="none">
+    <path d="M 138 118 Q 153 128 163 118"/>
+    <path d="M 138 118 Q 146 130 138 138"/>
+    <path d="M 312 118 Q 297 128 287 118"/>
+    <path d="M 312 118 Q 304 130 312 138"/>
+  </g>
+
+  <!-- 죽은 LED -->
+  <circle cx="225" cy="110" r="3" fill="#404040"/>
+
+  <!-- 먼지 dot -->
+  <g fill="rgba(255,255,255,0.06)">
+    <circle cx="170" cy="200" r="1"/>
+    <circle cx="220" cy="155" r="1.2"/>
+    <circle cx="280" cy="220" r="1"/>
+    <circle cx="195" cy="280" r="0.8"/>
+    <circle cx="265" cy="310" r="1"/>
+  </g>
+
+  <!-- 하단 라벨 (좌) -->
+  <text x="225" y="500" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="13" font-weight="600" fill="rgba(255,255,255,0.6)">기존 키오스크</text>
+  <text x="225" y="520" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="11" font-weight="500" fill="rgba(255,255,255,0.4)">노후화 · 멈춘 업데이트</text>
+
+  <!-- ========== 우측: 부활한 렛미업 키오스크 ========== -->
+  <!-- 받침 그림자 -->
+  <ellipse cx="675" cy="460" rx="120" ry="12" fill="rgba(19,196,211,0.25)"/>
+  <!-- 받침 -->
+  <rect x="585" y="425" width="180" height="20" rx="3" fill="#1a1a1a"/>
+  <rect x="645" y="350" width="60" height="80" fill="#1a1a1a"/>
+  <!-- 본체 -->
+  <rect x="570" y="100" width="210" height="260" rx="8" fill="url(#kioFrameNew)" stroke="#13C4D3" stroke-width="2"/>
+  <!-- 화면 -->
+  <rect x="588" y="118" width="174" height="224" rx="4" fill="url(#screenNew)"/>
+
+  <!-- letmeup 로고 영역 -->
+  <g transform="translate(600, 132)">
+    <rect x="0" y="2" width="11" height="11" rx="2.5" fill="#13C4D3"/>
+    <circle cx="5.5" cy="7.5" r="2.5" fill="white"/>
+    <rect x="7.5" y="0" width="5" height="5" rx="2.5" fill="#13C4D3"/>
+    <text x="18" y="11" font-family="Pretendard, sans-serif" font-size="11" font-weight="800" fill="#0e1116">letmeup</text>
+  </g>
+
+  <!-- 환영 메시지 -->
+  <text x="600" y="160" font-family="Pretendard, sans-serif" font-size="9" font-weight="700" fill="#07303B">어서 오세요, 김진아님!</text>
+  <text x="600" y="172" font-family="Pretendard, sans-serif" font-size="7" fill="#5b626d">짧은 휴식 후, 다시 집중할 시간이에요</text>
+
+  <!-- 출입관리 카드 2개 -->
+  <rect x="600" y="180" width="68" height="40" rx="3" fill="white" stroke="#13C4D3" stroke-width="1"/>
+  <circle cx="634" cy="194" r="6" fill="#E6FAFC"/>
+  <path d="M 631 194 L 634 197 L 638 191" stroke="#0BA5B2" stroke-width="1.4" fill="none"/>
+  <text x="634" y="213" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="7" font-weight="700" fill="#07303B">재입장</text>
+
+  <rect x="682" y="180" width="68" height="40" rx="3" fill="white" stroke="#13C4D3" stroke-width="1"/>
+  <g transform="translate(716, 194)">
+    <path d="M -4 0 L 4 0" stroke="#0BA5B2" stroke-width="1.4"/>
+    <path d="M 2 -3 L 5 0 L 2 3" stroke="#0BA5B2" stroke-width="1.4" fill="none"/>
+  </g>
+  <text x="716" y="213" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="7" font-weight="700" fill="#07303B">퇴장</text>
+
+  <!-- 메인 CTA -->
+  <rect x="600" y="228" width="150" height="38" rx="4" fill="url(#cyanBtn)"/>
+  <text x="675" y="252" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="11" font-weight="800" fill="white">이용권 구매</text>
+
+  <!-- 작은 카드 3개 -->
+  <rect x="600" y="274" width="46" height="32" rx="3" fill="white" stroke="#e6e8ec"/>
+  <circle cx="623" cy="285" r="4" fill="#F5A05B"/>
+  <text x="623" y="302" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="6" font-weight="700" fill="#07303B">내 이용권</text>
+
+  <rect x="652" y="274" width="46" height="32" rx="3" fill="white" stroke="#e6e8ec"/>
+  <circle cx="675" cy="285" r="4" fill="#13C4D3"/>
+  <text x="675" y="302" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="6" font-weight="700" fill="#07303B">좌석 이동</text>
+
+  <rect x="704" y="274" width="46" height="32" rx="3" fill="white" stroke="#e6e8ec"/>
+  <circle cx="727" cy="285" r="4" fill="#5BB948"/>
+  <text x="727" y="302" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="6" font-weight="700" fill="#07303B">얼굴등록</text>
+
+  <!-- 인증 정보 행 -->
+  <rect x="600" y="312" width="150" height="20" rx="3" fill="#E6FAFC"/>
+  <text x="608" y="326" font-family="Pretendard, sans-serif" font-size="7" font-weight="700" fill="#0BA5B2">⌧ PIN · QR · 얼굴인식</text>
+
+  <!-- 살아있는 LED -->
+  <circle cx="675" cy="110" r="4.5" fill="#13C4D3" opacity="0.4"/>
+  <circle cx="675" cy="110" r="2.5" fill="#13C4D3"/>
+
+  <!-- 빛 sparkles -->
+  <g fill="#13C4D3">
+    <circle cx="540" cy="140" r="2.5" class="spk"/>
+    <circle cx="800" cy="160" r="3" class="spk"/>
+    <circle cx="810" cy="280" r="2" class="spk"/>
+    <circle cx="530" cy="320" r="2.5" class="spk"/>
+    <circle cx="790" cy="400" r="2" class="spk"/>
+  </g>
+
+  <!-- 하단 라벨 (우) -->
+  <text x="675" y="500" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="13" font-weight="700" fill="#07303B">렛미업으로 부활</text>
+  <text x="675" y="520" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="11" font-weight="600" fill="#0BA5B2">SW 교체만으로 즉시 전환</text>
+
+  <!-- ========== 가운데 0원 배지 (우측 상단으로 배치 — 사용자 요청대로) ========== -->
+  <g transform="translate(810, 120)">
+    <!-- 외곽 글로우 -->
+    <circle cx="0" cy="0" r="62" fill="#FF5C39" opacity="0.15"/>
+    <circle cx="0" cy="0" r="52" fill="#FF5C39" opacity="0.22"/>
+    <!-- 배지 본체 -->
+    <circle cx="0" cy="0" r="44" fill="#FF5C39" stroke="white" stroke-width="3"/>
+    <!-- 텍스트 -->
+    <text x="0" y="-2" text-anchor="middle" font-family="Pretendard, sans-serif" font-size="28" font-weight="900" fill="white" letter-spacing="-1">0원</text>
+    <text x="0" y="18" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="8" font-weight="800" fill="rgba(255,255,255,0.95)" letter-spacing="1.5">START</text>
+  </g>
+
+  <!-- 가운데 VS 원 -->
+  <g transform="translate(450, 270)">
+    <circle cx="0" cy="0" r="42" fill="white" stroke="#e6e8ec" stroke-width="2"/>
+    <text x="0" y="9" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="22" font-weight="900" fill="#0e1116" letter-spacing="-1">VS</text>
+  </g>
+</svg>
+      </div>
+    </div>
+
+    <div class="compare-card">
+      <div style="font-size:13px;font-weight:700;color:var(--ink-3);letter-spacing:0.08em;text-transform:uppercase;font-family:var(--font-display);">스터디카페 1곳 · 연 환산 비교</div>
+      <div class="compare-row">
+        <div class="compare-col bad">
+          <div class="compare-label">일반 키오스크 업체</div>
+          <h4>지금까지의 비용 구조</h4>
+          <div class="compare-items">
+            <div class="compare-item"><span class="compare-item-label">키오스크 도입비</span><span class="compare-item-value">220만 원</span></div>
+            <div class="compare-item"><span class="compare-item-label">월 사용료</span><span class="compare-item-value">10만 원/월</span></div>
+            <div class="compare-item"><span class="compare-item-label">PG 결제 수수료</span><span class="compare-item-value">3% 이상</span></div>
+            <div class="compare-item"><span class="compare-item-label">시스템 업데이트</span><span class="compare-item-value">건별 견적</span></div>
+            <div class="compare-item"><span class="compare-item-label">기능 추가</span><span class="compare-item-value" style="color:var(--accent);">유료</span></div>
+          </div>
+        </div>
+        <div class="compare-vs">VS</div>
+        <div class="compare-col good">
+          <div class="compare-label">렛미업</div>
+          <h4>사장님이 부담할 비용</h4>
+          <div class="compare-items">
+            <div class="compare-item"><span class="compare-item-label">키오스크 도입비</span><span class="compare-item-value zero">0원부터</span></div>
+            <div class="compare-item"><span class="compare-item-label">월 사용료</span><span class="compare-item-value">업계 최저</span></div>
+            <div class="compare-item"><span class="compare-item-label">PG 결제 수수료</span><span class="compare-item-value">업계 최저</span></div>
+            <div class="compare-item"><span class="compare-item-label">시스템 업데이트</span><span class="compare-item-value zero">0원 / 자동</span></div>
+            <div class="compare-item"><span class="compare-item-label">기능 추가</span><span class="compare-item-value zero">✓ 무료 제공</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW TO ADOPT (3 옵션) ===== -->
+<section class="section adopt">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">How to Adopt</span>
+      <h2 class="section-title">렛미업 3가지로<br>도입 할 수 있어요.</h2>
+      <p class="section-sub">사장님 카페 상황에 맞춰 <span class="kw">3가지 방법</span>으로 시작합니다.<br>어느 방법이든 <span class="kw-brand">도입비는 0원</span>으로 출발합니다.</p>
+    </div>
+
+    <div class="adopt-grid">
+
+      <!-- 옵션 1: 기존 키오스크 업그레이드 -->
+      <div class="adopt-card">
+        <div class="adopt-num">OPTION 01</div>
+        <div class="adopt-visual">
+          <div class="adopt-visual-icon orange">
+            <img src="./assets/icon-cursor.svg" alt="">
+          </div>
+        </div>
+        <h3 class="adopt-title">기존 키오스크<br>업그레이드</h3>
+        <p class="adopt-desc">지금 쓰시는 키오스크 그대로, <span class="kw">소프트웨어만 렛미업으로</span> 바꿉니다. <span class="kw">가장 빠르고, 가장 저렴한</span> 전환 방식입니다.</p>
+        <div class="adopt-divider"></div>
+        <ul class="adopt-features">
+          <li>공급사 불문—타사 키오스크에 SW 설치</li>
+          <li>호환 검증 후 무료 원격 설치</li>
+          <li>기존 회원·이용권 데이터 그대로 이전</li>
+          <li>장비 추가 구매 없이 즉시 전환</li>
+        </ul>
+        <div class="adopt-meta">
+          <div class="adopt-meta-item">
+            <span class="adopt-meta-label">초기 비용</span>
+            <span class="adopt-meta-value">0원</span>
+          </div>
+          <div class="adopt-meta-item">
+            <span class="adopt-meta-label">전환 기간</span>
+            <span class="adopt-meta-value">최단 당일</span>
+          </div>
+          <div class="adopt-meta-item">
+            <span class="adopt-meta-label">호환 확인</span>
+            <span class="adopt-meta-value">상담 시</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 옵션 2: 태블릿 키오스크 (추천) -->
+      <div class="adopt-card recommended">
+        <span class="adopt-badge">⭐ 가장 많은 선택</span>
+        <div class="adopt-num">OPTION 02</div>
+        <div class="adopt-visual">
+          <div class="adopt-visual-icon cyan">
+            <img src="./assets/icon-kiosk.svg" alt="">
+          </div>
+        </div>
+        <h3 class="adopt-title">부담 없는<br>태블릿 키오스크</h3>
+        <p class="adopt-desc">렛미업이 처음부터 설계한 표준 키오스크. <span style="color:#5DE0EC;font-weight:800;">스터디카페 대부분이 선택하는 정답</span>이며, 모든 기능이 가장 완벽하게 작동합니다.</p>
+        <div class="adopt-divider"></div>
+        <ul class="adopt-features">
+          <li>도입비 0원 (장비 무상 제공)</li>
+          <li>얼굴인식·QR·지문·자동문 연동</li>
+          <li>풀 컬러 광고 배너 디스플레이</li>
+          <li>전국 어디든 무상 설치·세팅</li>
+          <li>고장 시 무상 교체 (정상 운영 보장)</li>
+        </ul>
+        <div class="adopt-meta">
+          <div class="adopt-meta-item">
+            <span class="adopt-meta-label">초기 비용</span>
+            <span class="adopt-meta-value">0원</span>
+          </div>
+          <div class="adopt-meta-item">
+            <span class="adopt-meta-label">설치 기간</span>
+            <span class="adopt-meta-value">약 ···일</span>
+          </div>
+          <div class="adopt-meta-item">
+            <span class="adopt-meta-label">A/S</span>
+            <span class="adopt-meta-value">무상</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 옵션 3: 베리어프리 키오스크 -->
+      <div class="adopt-card">
+        <div class="adopt-num">OPTION 03</div>
+        <div class="adopt-visual">
+          <div class="adopt-visual-icon deep">
+            <img src="./assets/icon-face.svg" alt="">
+          </div>
+        </div>
+        <h3 class="adopt-title">법적 부담 없는<br>베리어프리</h3>
+        <p class="adopt-desc">장애인·고령자도 누구나 쓸 수 있도록 설계한 프리미엄 키오스크. <span class="kw-accent">장애인차별금지법 시행령</span> 대응이 필요한 매장을 위한 정답입니다.</p>
+        <div class="adopt-divider"></div>
+        <ul class="adopt-features">
+          <li>휠체어 접근 가능 높이·각도</li>
+          <li>점자 키패드 / 음성 안내 지원</li>
+          <li>저시력·색약 대응 고대비 모드</li>
+          <li>법적 제재 대응 (의무 시설 대응)</li>
+          <li>관급·공공 시설 도입 적합</li>
+        </ul>
+        <div class="adopt-meta">
+          <div class="adopt-meta-item">
+            <span class="adopt-meta-label">초기 비용</span>
+            <span class="adopt-meta-value">별도 견적</span>
+          </div>
+          <div class="adopt-meta-item">
+            <span class="adopt-meta-label">설치 기간</span>
+            <span class="adopt-meta-value">약 ···일</span>
+          </div>
+          <div class="adopt-meta-item">
+            <span class="adopt-meta-label">법령 대응</span>
+            <span class="adopt-meta-value">✓ 포함</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="text-align:center; margin-top:48px;"><div style="display:inline-flex; flex-wrap:wrap; align-items:center; gap:16px; padding:20px 28px; background:var(--bg-soft); border-radius:var(--radius-l); border:1px solid var(--line);">
+      <div style="font-size:13px; font-weight:600; color:var(--ink-3); letter-spacing:0.04em;">🤔 어떤 방법이 맞을지 모르시겠다면?</div>
+      <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="btn btn-primary" style="padding:10px 20px; font-size:14px;">상담받고 결정하기 →</a>
+    </div></div>
+
+  </div>
+</section>
+
+<section class="section pillars">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">Why Letmeup</span>
+      <h2 class="section-title">스터디카페만을 위해<br>설계된 단 하나의 키오스크</h2>
+      <p class="section-sub">'무인 매장 전용' 솔루션이 아닌, <span class="kw-brand">'스터디카페 운영' 그 자체</span>를 위해 만든 키오스크입니다.</p>
+    </div>
+    <div class="pillar-grid">
+      <div class="pillar-card">
+        <div class="brand-icon cyan"><img src="./assets/icon-kiosk.svg" alt=""></div>
+        <h3>도입비 0원으로 시작</h3>
+        <p><span class="kw">새 키오스크 값을 사장님께 받지 않습니다.</span> VAN과 PG를 직접 운영해 결제 수수료에서 부담을 회수하는 구조라, 부담 없이 시작할 수 있습니다.</p>
+        <span class="pillar-tag">자체 VAN/PG · 업계 최저 수수료</span>
+      </div>
+      <div class="pillar-card">
+        <div class="brand-icon orange"><img src="./assets/icon-cursor.svg" alt=""></div>
+        <h3>어디서든 휴대폰으로</h3>
+        <p>카페에 없어도 <span class="kw">매출, 회원, 좌석 현황</span>을 휴대폰으로 바로 확인합니다. 출근 안 해도, 잠깐 자리를 비워도 운영이 멈추지 않습니다.</p>
+        <span class="pillar-tag">모바일 관리자 앱</span>
+      </div>
+      <div class="pillar-card">
+        <div class="brand-icon green"><img src="./assets/icon-face.svg" alt=""></div>
+        <h3>매달 새로워지는 시스템</h3>
+        <p><span class="kw">샘랩 자체 개발팀</span>이 매달 기능을 업데이트합니다. 사장님 요청이 <span class="kw">다음 달 업데이트에 반영</span>되고, 추가 비용 없이 그대로 사용할 수 있습니다.</p>
+        <span class="pillar-tag">자체 개발팀 · 정기 무료 업데이트</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section features">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">Core Features</span>
+      <h2 class="section-title">사장님이 원하던 기능,<br>전부 들어있습니다</h2>
+      <p class="section-sub">관리자 웹부터 회원이 쓸 키오스크까지 — 옆 카페에서 부러워하던 그 기능들, <span class="kw">추가 비용 없이 기본 제공.</span></p>
+    </div>
+
+    <!-- Showcase 1: 관리자 좌석 관리 -->
+    <div class="feature-showcase">
+      <div class="feature-showcase-text">
+        <div class="brand-icon deep" style="margin-bottom:20px;"><img src="./assets/icon-kiosk.svg" alt=""></div>
+        <span class="feature-showcase-tag">관리자 웹</span>
+        <h3>좌석 배치, 사장님 마음대로</h3>
+        <p>1층·2층 도면을 직접 그리고, <span class="kw">좌석·세미나실·가벽까지 자유롭게 배치</span>합니다. 카페 인테리어가 바뀌어도 <span class="kw-brand">클릭 몇 번이면 끝</span>. 자유석·고정석·세미나실은 색상으로 구분되어 한눈에 들어옵니다.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="pillar-tag">드래그앤드롭 편집</span>
+          <span class="pillar-tag">자유석·고정석·세미나실 구분</span>
+          <span class="pillar-tag">복층 지원</span>
+        </div>
+      </div>
+      <div class="feature-showcase-img">
+        <img src="./assets/admin-seats.webp" alt="렛미업 관리자 웹 - 좌석 배치 변경 화면">
+      </div>
+    </div>
+
+    <!-- Showcase 2: 사용자 키오스크 -->
+    <div class="feature-showcase reverse">
+      <div class="feature-showcase-text">
+        <div class="brand-icon green" style="margin-bottom:20px;"><img src="./assets/icon-face.svg" alt=""></div>
+        <span class="feature-showcase-tag">회원이 보는 화면</span>
+        <h3>회원이 한눈에 이해하는<br>키오스크 UI</h3>
+        <p>입퇴실·이용권 구매·좌석 이동·인증 정보 관리 — 회원이 자주 쓰는 기능을 <span class="kw">한 화면에 깔끔하게</span>. 처음 오는 회원도 헤매지 않고, <span class="kw">사장님께 묻는 일이 줄어듭니다.</span></p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="pillar-tag">QR · 지문 · 얼굴인식</span>
+          <span class="pillar-tag">3단계 이용권 구매</span>
+          <span class="pillar-tag">PIN·QR 직접 관리</span>
+        </div>
+      </div>
+      <div class="feature-showcase-img" style="background: linear-gradient(135deg, #f0fdfa 0%, #e6f7f4 100%); padding: 30px;">
+        <img src="./assets/user-main.webp" alt="렛미업 사용자 키오스크 - 메인 화면">
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card feature-hero">
+        <div class="brand-icon orange" style="margin-bottom:24px;"><img src="./assets/icon-ticket.svg" alt=""></div>
+        <h3>모든 결제 수단을<br>키오스크 하나에서</h3>
+        <p>신용카드, 카카오페이, 현금, 지역화폐, 마일리지까지 — <span style="color:#5DE0EC;font-weight:800;">회원이 쓰는 모든 결제 수단</span>을 한 화면에서 처리합니다. <span style="color:white;font-weight:800;">결제 막혀서 회원 놓치는 일, 더 이상 없습니다.</span></p>
+        <div class="feature-list">
+          <span class="feature-tag">신용카드 · 일시불/할부</span>
+          <span class="feature-tag">카카오페이</span>
+          <span class="feature-tag">현금</span>
+          <span class="feature-tag">지역화폐</span>
+          <span class="feature-tag">마일리지 사용/적립</span>
+        </div>
+        <div class="feature-image" style="background: linear-gradient(135deg, #f0fdfa 0%, #e6f7f4 100%); padding: 24px; max-width: 360px; margin-left: auto; margin-top: 28px;">
+          <img src="./assets/user-payment.webp" alt="렛미업 키오스크 결제 화면" style="border-radius:8px;">
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <h3>모든 결제 수단 지원</h3>
+        <p>신용카드, 간편결제, 지역화폐까지 — 회원이 쓰는 모든 결제 수단을 키오스크 하나에서. 결제 막혀서 회원 놓치는 일, 더 이상 없습니다.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--brand-soft);font-size:24px;">🪑</div>
+        <h3>좌석 관리</h3>
+        <p>좌석 배치는 사장님 마음대로. 시간권·기간권·정기권 설정, 정원 관리, 좌석 변경까지 — 카페 운영 방식에 맞게 자유롭게.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--accent-soft);font-size:24px;">📊</div>
+        <h3>매출·결제 내역 관리</h3>
+        <p>시간대별·회원별 매출을 한눈에. 어느 시간에 회원이 많은지, 어떤 이용권이 잘 팔리는지 — 데이터로 카페를 운영하세요.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#EAFBE6;font-size:24px;">📲</div>
+        <h3>회원 모바일 앱</h3>
+        <p>회원이 직접 앱에서 이용권 구매·연장. 사장님이 카운터에 묶일 일 없고, 회원은 줄 설 일 없습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section testimonials">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">Voice of Owners</span>
+      <h2 class="section-title">이미 많은 사장님이<br>렛미업으로 갈아탔습니다</h2>
+      <p class="section-sub">렛미업을 선택한 스터디카페 <span class="kw">사장님들의 실제 후기.</span></p>
+    </div>
+    <div class="testimonial-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <h3 class="testimonial-headline">"새 키오스크 값 안 받는다고 해서 반신반의했어요"</h3>
+        <p class="testimonial-body">기존 업체 거 바꿔야겠다 싶었는데, 새 거 사려니 ···만 원이라 못 바꾸고 있었거든요. 렛미업은 진짜로 도입비 안 받고, 매달 결제 수수료도 더 싸요. 그동안 손해 본 게 아까울 정도입니다.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">김</div>
+          <div class="author-info">
+            <div class="author-name">김 사장님</div>
+            <div class="author-meta">···스터디카페 · 운영 ···년차</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <h3 class="testimonial-headline">"휴대폰으로 매출 보는 게 이렇게 편한 줄 몰랐어요"</h3>
+        <p class="testimonial-body">전에는 카페 가야 매출 확인 가능했는데, 지금은 자려고 누워서도 오늘 매출이 얼마인지 봅니다. 회원 입퇴실도 실시간으로 떠서 안심돼요. 이거 하나로 출근 횟수가 반으로 줄었습니다.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">박</div>
+          <div class="author-info">
+            <div class="author-name">박 사장님</div>
+            <div class="author-meta">···스터디카페 · 2호점 준비 중</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <h3 class="testimonial-headline">"업데이트가 진짜 매달 됩니다"</h3>
+        <p class="testimonial-body">기존 업체는 1년 동안 아무것도 안 바뀌었거든요. 렛미업은 들어온 지 ···개월 됐는데 그동안 새 기능이 몇 개나 추가됐어요. 그것도 다 무료로요. 시스템이 살아있다는 느낌이 듭니다.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">이</div>
+          <div class="author-info">
+            <div class="author-name">이 사장님</div>
+            <div class="author-meta">···스터디카페 · ···지점</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section process">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">How It Works</span>
+      <h2 class="section-title">전환은 어렵지 않습니다</h2>
+      <p class="section-sub">상담부터 설치까지, <span class="kw">사장님은 카페만 운영하시면 됩니다.</span></p>
+    </div>
+    <div class="process-grid">
+      <div class="process-step">
+        <div class="process-num">STEP 01</div>
+        <h3>무료 상담</h3>
+        <p>지금 쓰는 키오스크, 결제 수수료, 운영 방식을 알려주세요. 사장님 카페에 맞는 도입 방법을 무료로 안내해 드립니다.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-num">STEP 02</div>
+        <h3>설치 · 데이터 이전</h3>
+        <p>설치는 저희가 직접 방문해 진행합니다. 기존 회원 정보·이용권 데이터도 그대로 옮겨드려요. 사장님은 손 하나 까딱하실 필요 없습니다.</p>
+      </div>
+      <div class="process-step">
+        <div class="process-num">STEP 03</div>
+        <h3>바로 운영 시작</h3>
+        <p>설치 당일부터 회원 입퇴실·결제·관리가 가능합니다. 운영 중 문의는 채팅·전화로 언제든 응대해 드립니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section faq">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">FAQ</span>
+      <h2 class="section-title">사장님들이 자주 묻는 질문</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>정말 도입비 0원인가요? 숨은 비용 없나요?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">네, 키오스크 본체 도입비는 받지 않습니다. 저희가 VAN/PG를 직접 운영해 결제 수수료에서 비용을 회수하는 구조라 가능합니다. 매월 사용료와 결제 수수료만 발생하며, 상담 시 모든 비용 항목을 투명하게 안내해 드립니다.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>지금 쓰는 키오스크는 어떻게 처리하나요?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">렛미업 키오스크로 교체하시면, 기존 장비는 사장님이 보관·처분하시면 됩니다. 기존 회원 정보, 이용권 잔여 일수, 매출 데이터는 가능한 한 그대로 이전해 드립니다.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>결제 수수료가 정확히 몇 %인가요?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">카드사·결제 수단별로 다르며, 현재 사장님이 내고 계신 수수료와 1:1로 비교해 절감액을 시뮬레이션해 드립니다. 무료 상담 시 정확한 수치를 안내드립니다.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>약정이나 위약금이 있나요?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">기본 도입에 약정은 없습니다. 다만 도입비를 받지 않는 구조이기에 일정 기간 결제 수수료 기반의 파트너십을 전제로 합니다. 자세한 조건은 계약 단계에서 안내드립니다.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>고장 나거나 문제가 생기면 어떻게 하나요?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">평일 운영시간 내 채팅·전화 상담을 운영하며, 원격 점검으로 대부분 즉시 해결됩니다. 하드웨어 이슈는 별도 출장 점검도 가능합니다. 새벽·심야 장애 대비 가이드도 함께 제공해 드립니다.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>2호점, 3호점도 같이 관리할 수 있나요?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">네, 가능합니다. 사장님이 운영하시는 모든 지점을 하나의 관리자 화면에서 한눈에 보실 수 있습니다. 매출 비교, 회원 통합 관리도 지원합니다.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">
+          <span>설치까지 얼마나 걸리나요?</span>
+          <span class="faq-toggle">+</span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">상담 후 평균 ···일 이내 설치가 가능합니다. 기존 데이터 이전 작업이 있는 경우 일정이 조율될 수 있으며, 모든 일정은 사장님과 협의해 진행합니다.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta" id="cta">
+  <div class="container final-cta-inner">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span>무료 상담 · 비용 시뮬레이션</span>
+    </div>
+    <h2>이제 사장님도,<br><span class="accent">바꿀 수 있습니다</span></h2>
+    <p>지금 쓰시는 <strong style="color:white;">키오스크와 결제 수수료</strong>만 알려주세요.<br>사장님 카페 기준으로, <strong style="color:#5DE0EC;">매달 얼마나 아낄 수 있는지</strong> 1:1로 계산해 드립니다.</p>
+    <div class="cta-row" style="margin-bottom:0;">
+      <a href="tel:1688-4264" class="btn btn-primary">📞 1688-4264 전화 상담</a>
+      <a href="mailto:samlab@samlab.co.kr" class="btn btn-secondary">이메일로 문의하기</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <img src="./assets/logo-letmeup.svg" alt="렛미업" class="footer-logo-img">
+        <div style="color:rgba(255,255,255,0.5);">스터디카페 사장님을 위한 무인 키오스크</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="footer-tel">Tel. 1688-4264</div>
+        <div style="margin-top:6px;color:rgba(255,255,255,0.5);">samlab@samlab.co.kr</div>
+      </div>
+    </div>
+    <div class="footer-info">
+      <p><strong style="color:rgba(255,255,255,0.7);">샘랩주식회사</strong> · 대표 심세용 · 경기도 시흥시 은계중앙로 362, 수림프라자 902호, 1001호</p>
+      <p>사업자등록번호 531-87-00830 · 통신판매업 신고번호 2019-경기안산-0776</p>
+      <p style="margin-top:12px;">Copyright © 2026 SAMLAB Corp. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.parentElement;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
+});
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href');
+    if (id === '#') return;
+    const target = document.querySelector(id);
+    if (target) {
+      e.preventDefault();
+      const offset = target.getBoundingClientRect().top + window.scrollY - 70;
+      window.scrollTo({ top: offset, behavior: 'smooth' });
+    }
+  });
+});
+
+
+// ===== Stats 카운트업 (IntersectionObserver 진입 시 0 -> data-target) =====
+(function(){
+  var counters = document.querySelectorAll('.stat-count[data-target]');
+  if (!counters.length) return;
+  function format(n){ return n.toLocaleString('ko-KR'); }
+  function animate(el){
+    var target = parseFloat(el.getAttribute('data-target'));
+    var dur = parseInt(el.getAttribute('data-duration') || '2000', 10);
+    var start = performance.now();
+    function tick(now){
+      var p = Math.min(1, (now - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var val = Math.round(target * eased);
+      el.textContent = format(val);
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = format(target);
+    }
+    requestAnimationFrame(tick);
+  }
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          animate(entry.target);
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(function(el){ io.observe(el); });
+  } else {
+    counters.forEach(animate);
+  }
+})();
+
+// ===== Floating CTA 스크롤 제어 (Hero 지나면 노출 / FinalCTA 보이면 숨김) =====
+document.addEventListener('DOMContentLoaded', function(){
+  var floatEl = document.getElementById('floatCta');
+  if (!floatEl) return;
+  var hero = document.querySelector('.hero, section.hero, #hero');
+  var finalCta = document.getElementById('cta') || document.querySelector('.finalcta, #finalcta');
+  var ticking = false;
+  function update(){
+    var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    var heroBottom = hero ? (hero.offsetTop + hero.offsetHeight) : 400;
+    if (scrollY > heroBottom * 0.5) floatEl.classList.add('scrolled');
+    else floatEl.classList.remove('scrolled');
+    if (finalCta){
+      var rect = finalCta.getBoundingClientRect();
+      var visible = rect.top < window.innerHeight * 0.8 && rect.bottom > 0;
+      if (visible) floatEl.classList.add('hidden');
+      else floatEl.classList.remove('hidden');
+    }
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if (!ticking){ requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+  window.addEventListener('resize', update, { passive: true });
+  update();
+});
+</script>
+
+
+<!-- ===== FLOATING CTA ===== -->
+<div class="float-cta" id="floatCta">
+  <div class="float-bubble" id="floatBubble">
+    👋 <span><strong>도입 상담</strong>은 무료예요. 부담 없이 문의해보세요.</span>
+  </div>
+  <div class="float-buttons">
+    <a href="tel:1688-4264" class="float-btn float-btn-secondary" aria-label="전화 상담">📞</a>
+    <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="float-btn float-btn-primary float-pulse">
+      <span>도입 문의하기</span>
+      <span class="float-btn-icon">→</span>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>
