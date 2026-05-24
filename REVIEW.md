@@ -1,6 +1,6 @@
-# lp.letmeup.io 검수 리포트
+# letmeup.shop 검수 리포트
 
-> 검수 대상: `C:\samagt\lp.letmeup.io\pages\index.html` (262KB, 자족버전)
+> 검수 대상: `C:\samagt\letmeup.shop\pages\index.html` (262KB, 자족버전)
 > 검수 일자: 2026-05-23
 > 검수 방법: 정적 코드 분석 + Playwright(Chromium) 헤드리스 렌더링 (Desktop 1440 / Mobile 390)
 
