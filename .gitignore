@@ -15,3 +15,7 @@ desktop.ini
 
 # 로그
 *.log
+
+# 작업 부산물
+*.bundle
+push-to-github.bat
