@@ -1,7 +1,7 @@
-import type { Order } from "./types";
+import type { LocationRecord, Order, SavedPaymentMethod } from "./types";
 
 /**
- * 주문 임시 저장소.
+ * 주문/결제수단/위치 임시 저장소.
  *
  * 지금은 프로세스 메모리에 보관합니다(개발/데모용). 실제 운영에서는
  * DynamoDB / RDS / Supabase 등으로 교체하세요. 교체 지점은 이 파일의
@@ -9,9 +9,22 @@ import type { Order } from "./types";
  */
 
 // Next dev 환경의 HMR로 모듈이 재평가돼도 데이터가 유지되도록 globalThis에 보관
-const g = globalThis as unknown as { __letmeupOrders?: Map<string, Order> };
+const g = globalThis as unknown as {
+  __letmeupOrders?: Map<string, Order>;
+  __letmeupPaymentMethods?: Map<string, SavedPaymentMethod[]>;
+  __letmeupLocations?: Map<string, LocationRecord>;
+};
 const orders: Map<string, Order> = g.__letmeupOrders ?? new Map();
 g.__letmeupOrders = orders;
+
+// deviceId → 저장된 결제수단 목록
+const paymentMethods: Map<string, SavedPaymentMethod[]> =
+  g.__letmeupPaymentMethods ?? new Map();
+g.__letmeupPaymentMethods = paymentMethods;
+
+// deviceId → 마지막 수집 위치
+const locations: Map<string, LocationRecord> = g.__letmeupLocations ?? new Map();
+g.__letmeupLocations = locations;
 
 export function saveOrder(order: Order): Order {
   orders.set(order.id, order);
@@ -28,6 +41,66 @@ export function updateOrder(id: string, patch: Partial<Order>): Order | undefine
   const next = { ...cur, ...patch };
   orders.set(id, next);
   return next;
+}
+
+// ── 결제수단 ──────────────────────────────────────────────────────────────
+
+export function listPaymentMethods(deviceId: string): SavedPaymentMethod[] {
+  return paymentMethods.get(deviceId) ?? [];
+}
+
+export function addPaymentMethod(
+  deviceId: string,
+  pm: SavedPaymentMethod,
+): SavedPaymentMethod {
+  const list = paymentMethods.get(deviceId) ?? [];
+  // 첫 등록이면 기본 결제수단으로 지정
+  if (list.length === 0) pm.isDefault = true;
+  list.push(pm);
+  paymentMethods.set(deviceId, list);
+  return pm;
+}
+
+export function removePaymentMethod(deviceId: string, id: string): boolean {
+  const list = paymentMethods.get(deviceId) ?? [];
+  const next = list.filter((p) => p.id !== id);
+  if (next.length === list.length) return false;
+  // 기본 결제수단을 지웠다면 남은 것 중 첫 번째를 기본으로
+  if (!next.some((p) => p.isDefault) && next[0]) next[0].isDefault = true;
+  paymentMethods.set(deviceId, next);
+  return true;
+}
+
+export function setDefaultPaymentMethod(deviceId: string, id: string): boolean {
+  const list = paymentMethods.get(deviceId) ?? [];
+  if (!list.some((p) => p.id === id)) return false;
+  list.forEach((p) => (p.isDefault = p.id === id));
+  paymentMethods.set(deviceId, list);
+  return true;
+}
+
+export function getPaymentMethod(
+  deviceId: string,
+  id: string,
+): SavedPaymentMethod | undefined {
+  return (paymentMethods.get(deviceId) ?? []).find((p) => p.id === id);
+}
+
+// ── 위치 ──────────────────────────────────────────────────────────────────
+
+export function saveLocation(deviceId: string, rec: LocationRecord): LocationRecord {
+  locations.set(deviceId, rec);
+  return rec;
+}
+
+export function getLocation(deviceId: string): LocationRecord | undefined {
+  return locations.get(deviceId);
+}
+
+// ── ID 생성 ────────────────────────────────────────────────────────────────
+
+export function newId(prefix: string): string {
+  return prefix + Math.random().toString(36).slice(2, 12).toUpperCase();
 }
 
 export function newOrderId(): string {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CouponCard from "@/components/CouponCard";
+import NearbyStores from "@/components/NearbyStores";
 import { categories, coupons } from "@/lib/data";
 
 export default function HomePage() {
@@ -95,6 +96,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Nearby stores (위치 수집) */}
+      <NearbyStores />
 
       {/* Best deals */}
       <section className="container-page py-10">

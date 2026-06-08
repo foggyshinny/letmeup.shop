@@ -52,6 +52,40 @@ export interface OrderItem {
   qty: number;
 }
 
+/** 결제 수단 종류 */
+export type PayMethod =
+  | "card" // 새 카드 결제 (KSNET 결제창)
+  | "saved" // 저장된 카드 (빌링키 자동결제)
+  | "applepay"
+  | "googlepay"
+  | "kakaopay"
+  | "naverpay"
+  | "samsungpay";
+
+/** 사용자가 등록·저장한 결제수단 (실제 카드번호는 저장하지 않음, 빌링키만 보관) */
+export interface SavedPaymentMethod {
+  id: string;
+  type: PayMethod;
+  /** 표시용 라벨 (예: "신한카드 ****1234") */
+  label: string;
+  brand?: string;
+  last4?: string;
+  expMonth?: string;
+  expYear?: string;
+  /** KSNET 빌링키(자동결제 키). 카드번호 대신 이 값으로 결제 */
+  billingKey?: string;
+  isDefault?: boolean;
+  createdAt: string;
+}
+
+/** 위치 수집 기록 (동의 기반) */
+export interface LocationRecord {
+  lat: number;
+  lng: number;
+  accuracy?: number;
+  consentedAt: string;
+}
+
 export type OrderStatus =
   | "pending" // 결제창 진입 전/대기
   | "paid" // 결제 승인 완료
@@ -72,7 +106,7 @@ export interface Order {
     provider: "ksnet";
     tid?: string;
     approvalNo?: string;
-    method?: string;
+    method?: PayMethod | string;
     approvedAt?: string;
   };
 }

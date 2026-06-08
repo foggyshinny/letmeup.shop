@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/components/CartContext";
+import PayMethodSelector, { type PaySelection } from "@/components/PayMethodSelector";
 import { coupons } from "@/lib/data";
 import { won } from "@/lib/format";
 
@@ -11,6 +12,7 @@ export default function CheckoutPage() {
   const { lines, subtotal, clear, ready } = useCart();
   const router = useRouter();
   const [form, setForm] = useState({ name: "", phone: "", email: "", agree: false });
+  const [pay, setPay] = useState<PaySelection>({ method: "card" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,20 +51,24 @@ export default function CheckoutPage() {
       if (!orderRes.ok) throw new Error("주문 생성에 실패했습니다.");
       const { orderId } = await orderRes.json();
 
-      // 2) 결제 준비 (KSNET)
+      // 2) 결제 준비 (KSNET) — 선택한 결제수단 전달
       const payRes = await fetch("/api/payments/ksnet/ready", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({
+          orderId,
+          method: pay.method,
+          paymentMethodId: pay.paymentMethodId,
+        }),
       });
-      const pay = await payRes.json();
+      const result = await payRes.json();
 
-      if (pay.mode === "live") {
+      if (result.mode === "live") {
         // 실거래: KSNET 결제창으로 폼 전송
         const f = document.createElement("form");
         f.method = "POST";
-        f.action = pay.action;
-        Object.entries(pay.fields as Record<string, string>).forEach(([k, v]) => {
+        f.action = result.action;
+        Object.entries(result.fields as Record<string, string>).forEach(([k, v]) => {
           const input = document.createElement("input");
           input.type = "hidden";
           input.name = k;
@@ -74,7 +80,11 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 모의 모드: 즉시 완료 처리
+      if (result.approved === false) {
+        throw new Error(result.message ?? "결제가 승인되지 않았습니다.");
+      }
+
+      // 승인 완료: 완료 페이지로
       clear();
       router.push(`/checkout/complete?order=${orderId}`);
     } catch (e) {
@@ -130,12 +140,10 @@ export default function CheckoutPage() {
 
           <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-slate-100">
             <h2 className="text-lg font-extrabold">결제 수단</h2>
-            <div className="mt-4 flex items-center gap-2 rounded-xl bg-brand-light p-4 text-sm">
-              <span className="text-xl">💳</span>
-              <span className="font-semibold">KSNET 간편결제</span>
-              <span className="text-ink-muted">(신용카드 · 계좌이체 · 간편결제)</span>
+            <div className="mt-4">
+              <PayMethodSelector value={pay} onChange={setPay} />
             </div>
-            <label className="mt-4 flex items-start gap-2 text-sm">
+            <label className="mt-5 flex items-start gap-2 border-t border-slate-100 pt-4 text-sm">
               <input
                 type="checkbox"
                 className="mt-0.5"

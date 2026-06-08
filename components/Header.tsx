@@ -34,6 +34,13 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/account/payment-methods"
+            className="btn-ghost hidden px-3 py-2 sm:inline-flex"
+          >
+            <span aria-hidden>👛</span>
+            <span className="hidden md:inline">내 지갑</span>
+          </Link>
           <Link href="/cart" className="btn-ghost relative px-3 py-2">
             <span aria-hidden>🛒</span>
             <span className="hidden sm:inline">장바구니</span>

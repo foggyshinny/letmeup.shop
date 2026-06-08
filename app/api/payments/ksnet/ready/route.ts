@@ -1,22 +1,35 @@
 import { NextResponse } from "next/server";
-import { getOrder, updateOrder } from "@/lib/store";
-import { buildPaymentRequest, isLive, approve } from "@/lib/ksnet";
+import { getDeviceId } from "@/lib/device";
+import { getOrder, getPaymentMethod, updateOrder } from "@/lib/store";
+import {
+  approve,
+  buildPaymentRequest,
+  isLive,
+  ksnetSupportsMethod,
+  payWithBillingKey,
+} from "@/lib/ksnet";
+import type { ApprovalResult } from "@/lib/ksnet";
+import type { PayMethod } from "@/lib/types";
 
 /**
  * 결제 준비 엔드포인트.
- * - 실거래 모드(KSNET 설정됨): 결제창 호출에 필요한 action/fields를 반환.
- *   클라이언트가 해당 폼을 KSNET 결제창으로 POST 전송한다.
- * - 모의 모드(미설정): 즉시 승인 처리 후 완료 신호를 반환.
+ *
+ * 결제수단(method)에 따라 분기합니다:
+ * - "saved": 저장된 카드의 빌링키로 즉시 자동결제 (서버 승인)
+ * - 그 외(card/applepay/kakaopay ...):
+ *     실거래 모드 → KSNET 결제창 폼(action/fields) 반환 (간편결제는 payMethod로 전달)
+ *     모의 모드   → 즉시 승인 처리
  */
 export async function POST(req: Request) {
-  let orderId: string;
+  let body: { orderId?: string; method?: PayMethod; paymentMethodId?: string };
   try {
-    ({ orderId } = await req.json());
+    body = await req.json();
   } catch {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
 
-  const order = getOrder(orderId);
+  const { orderId, method = "card", paymentMethodId } = body;
+  const order = orderId ? getOrder(orderId) : undefined;
   if (!order) {
     return NextResponse.json({ error: "주문을 찾을 수 없습니다." }, { status: 404 });
   }
@@ -24,29 +37,40 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "이미 결제된 주문입니다." }, { status: 409 });
   }
 
-  // 실거래 모드: 결제창 폼 데이터 반환
-  if (isLive()) {
-    const request = buildPaymentRequest(order);
-    return NextResponse.json({ mode: "live", ...request });
+  const settle = (result: ApprovalResult) => {
+    if (!result.success) {
+      updateOrder(order.id, { status: "failed" });
+      return NextResponse.json({ mode: "settled", approved: false, message: result.message });
+    }
+    updateOrder(order.id, {
+      status: "paid",
+      payment: {
+        provider: "ksnet",
+        tid: result.tid,
+        approvalNo: result.approvalNo,
+        method: result.method,
+        approvedAt: new Date().toISOString(),
+      },
+    });
+    return NextResponse.json({ mode: "settled", approved: true, orderId: order.id });
+  };
+
+  // ── 저장된 카드(빌링키) 자동결제 ──
+  if (method === "saved") {
+    const deviceId = await getDeviceId();
+    const pm = paymentMethodId ? getPaymentMethod(deviceId, paymentMethodId) : undefined;
+    if (!pm || !pm.billingKey) {
+      return NextResponse.json({ error: "선택한 결제수단을 찾을 수 없습니다." }, { status: 400 });
+    }
+    return settle(await payWithBillingKey(order, pm.billingKey));
   }
 
-  // 모의 모드: 바로 승인 처리
-  const result = await approve(order, {});
-  if (!result.success) {
-    updateOrder(order.id, { status: "failed" });
-    return NextResponse.json({ mode: "mock", approved: false, message: result.message });
+  // ── 실거래 모드: KSNET 결제창으로 ──
+  if (isLive() && (method === "card" || ksnetSupportsMethod(method))) {
+    const request = buildPaymentRequest(order, method);
+    return NextResponse.json({ mode: "live", method, ...request });
   }
 
-  updateOrder(order.id, {
-    status: "paid",
-    payment: {
-      provider: "ksnet",
-      tid: result.tid,
-      approvalNo: result.approvalNo,
-      method: result.method,
-      approvedAt: new Date().toISOString(),
-    },
-  });
-
-  return NextResponse.json({ mode: "mock", approved: true, orderId: order.id });
+  // ── 모의 모드: 즉시 승인 ──
+  return settle(await approve(order, { method }));
 }

@@ -65,11 +65,23 @@ export interface PaymentRequest {
   fields: Record<string, string>;
 }
 
+/** KSNET 결제창 payMethod 코드 매핑 (간편결제 포함).
+ *  TODO: 실제 매뉴얼의 결제수단 코드값으로 교체. */
+const KSNET_PAY_METHOD: Record<string, string> = {
+  card: "CARD",
+  applepay: "APPLEPAY",
+  googlepay: "GOOGLEPAY",
+  kakaopay: "KAKAOPAY",
+  naverpay: "NAVERPAY",
+  samsungpay: "SAMSUNGPAY",
+};
+
 /**
  * 결제창 호출에 필요한 폼 데이터를 구성합니다.
+ * @param method 결제수단(card/applepay/kakaopay ...). 간편결제는 결제창에 payMethod로 전달.
  * TODO: 필드명(payMethod, ordrIdxx, amount ...)을 KSNET 매뉴얼 규격으로 교체.
  */
-export function buildPaymentRequest(order: Order): PaymentRequest {
+export function buildPaymentRequest(order: Order, method = "card"): PaymentRequest {
   const cfg = getKsnetConfig();
   const returnUrl = `${cfg.baseUrl}/api/payments/ksnet/callback`;
 
@@ -83,10 +95,16 @@ export function buildPaymentRequest(order: Order): PaymentRequest {
       buyerName: order.buyerName,
       buyerTel: order.buyerPhone,
       buyerEmail: order.buyerEmail,
+      payMethod: KSNET_PAY_METHOD[method] ?? "CARD",
       returnUrl,
       signature: signRequest(cfg, order.id, order.amount),
     },
   };
+}
+
+/** 간편결제(애플페이 등)를 KSNET 결제창으로 처리할 수 있는 수단인지 */
+export function ksnetSupportsMethod(method: string): boolean {
+  return method in KSNET_PAY_METHOD;
 }
 
 export interface ApprovalResult {
@@ -116,7 +134,7 @@ export async function approve(
       success: true,
       tid: "MOCK" + order.id,
       approvalNo: Math.random().toString().slice(2, 12),
-      method: "card",
+      method: callbackData.method ?? "card",
       message: "모의 결제 승인 (KSNET 미설정)",
     };
   }
@@ -147,6 +165,134 @@ export async function approve(
   } catch (e) {
     return { success: false, message: "승인 요청 중 오류: " + String(e) };
   }
+}
+
+// ── 결제수단 등록(빌링키) / 자동결제 ─────────────────────────────────────────
+
+export interface CardInput {
+  number: string; // 카드번호 (서버에 저장하지 않음)
+  expMonth: string; // MM
+  expYear: string; // YY
+  birth?: string; // 생년월일 6자리 또는 사업자번호
+  password2?: string; // 카드 비밀번호 앞 2자리
+  holder?: string;
+}
+
+export interface BillingResult {
+  success: boolean;
+  billingKey?: string;
+  brand?: string;
+  last4?: string;
+  message?: string;
+}
+
+/**
+ * 카드 등록 → 빌링키(자동결제 키) 발급.
+ *
+ * 실거래: KSNET 빌링키 발급 API 호출. 카드 원문은 KSNET에 전달만 하고
+ *         우리 서버에는 빌링키/브랜드/끝 4자리만 보관합니다(PCI 범위 최소화).
+ * 모의 모드: 카드번호로부터 브랜드/끝4자리만 추출해 가짜 빌링키 발급.
+ *
+ * TODO: 실거래 시 endpoint/payload/응답 파싱을 KSNET 빌링키 매뉴얼에 맞게 구현.
+ */
+export async function registerBillingKey(card: CardInput): Promise<BillingResult> {
+  const cfg = getKsnetConfig();
+  const digits = card.number.replace(/\D/g, "");
+  const last4 = digits.slice(-4);
+  const brand = detectBrand(digits);
+
+  if (!isLive(cfg)) {
+    if (digits.length < 12) return { success: false, message: "카드번호를 확인해 주세요." };
+    return {
+      success: true,
+      billingKey: "BKMOCK" + Math.random().toString(36).slice(2, 14).toUpperCase(),
+      brand,
+      last4,
+      message: "모의 카드 등록 (KSNET 미설정)",
+    };
+  }
+
+  try {
+    const res = await fetch(`${cfg.apiBase}/v1/billing/keys`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mid: cfg.mid,
+        cardNo: digits,
+        expMonth: card.expMonth,
+        expYear: card.expYear,
+        birth: card.birth,
+        cardPw: card.password2,
+      }),
+    });
+    const data = (await res.json()) as Record<string, string>;
+    const ok = data.resultCode === "0000";
+    return {
+      success: ok,
+      billingKey: data.billingKey ?? data.bid,
+      brand,
+      last4,
+      message: data.resultMsg,
+    };
+  } catch (e) {
+    return { success: false, message: "카드 등록 중 오류: " + String(e) };
+  }
+}
+
+/**
+ * 저장된 빌링키로 자동결제(승인).
+ * TODO: 실거래 시 KSNET 빌링 승인 API 규격에 맞게 구현.
+ */
+export async function payWithBillingKey(
+  order: Order,
+  billingKey: string,
+): Promise<ApprovalResult> {
+  const cfg = getKsnetConfig();
+
+  if (!isLive(cfg)) {
+    return {
+      success: true,
+      tid: "MOCK" + order.id,
+      approvalNo: Math.random().toString().slice(2, 12),
+      method: "saved",
+      message: "모의 자동결제 승인 (KSNET 미설정)",
+    };
+  }
+
+  try {
+    const res = await fetch(`${cfg.apiBase}/v1/billing/payments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mid: cfg.mid,
+        billingKey,
+        orderNo: order.id,
+        amount: order.amount,
+        productName: summarize(order),
+        signature: signRequest(cfg, order.id, order.amount),
+      }),
+    });
+    const data = (await res.json()) as Record<string, string>;
+    const ok = data.resultCode === "0000";
+    return {
+      success: ok,
+      tid: data.tid,
+      approvalNo: data.approvalNo,
+      method: "saved",
+      message: data.resultMsg,
+    };
+  } catch (e) {
+    return { success: false, message: "자동결제 중 오류: " + String(e) };
+  }
+}
+
+function detectBrand(digits: string): string {
+  if (/^4/.test(digits)) return "VISA";
+  if (/^5[1-5]/.test(digits)) return "Mastercard";
+  if (/^3[47]/.test(digits)) return "AMEX";
+  if (/^35/.test(digits)) return "JCB";
+  if (/^62/.test(digits)) return "UnionPay";
+  return "카드";
 }
 
 function summarize(order: Order): string {

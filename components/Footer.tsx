@@ -19,6 +19,7 @@ export default function Footer() {
           <ul className="mt-3 space-y-2 text-sm text-ink-muted">
             <li><Link href="/coupons" className="hover:text-ink">전체 쿠폰</Link></li>
             <li><Link href="/cart" className="hover:text-ink">장바구니</Link></li>
+            <li><Link href="/account/payment-methods" className="hover:text-ink">내 지갑</Link></li>
             <li><Link href="/sell" className="hover:text-ink">입점 신청</Link></li>
             <li><a href="/legacy/index.html" className="hover:text-ink">렛미업 키오스크 소개</a></li>
           </ul>
@@ -38,6 +39,10 @@ export default function Footer() {
         <div className="container-page flex flex-col gap-1 py-6 text-xs text-ink-muted">
           <p>샘랩주식회사 · 대표 ○○○ · 사업자등록번호 000-00-00000</p>
           <p>통신판매업신고 제0000-서울00-0000호 · 서울특별시 ○○구 ○○로 00</p>
+          <p className="mt-1">
+            결제수단 정보는 PG사(KSNET)를 통해 안전하게 처리되며, 위치 정보는 동의 시 가까운
+            매장 안내 목적에만 이용됩니다.
+          </p>
           <p className="mt-2">© {new Date().getFullYear()} letmeup.shop. All rights reserved.</p>
         </div>
       </div>
