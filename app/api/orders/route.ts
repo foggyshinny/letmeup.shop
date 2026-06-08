@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { getCoupon } from "@/lib/data";
-import { newOrderId, saveOrder } from "@/lib/store";
+import { listOrdersByOwner, newOrderId, saveOrder } from "@/lib/store";
+import { getOwnerId } from "@/lib/device";
 import type { CartLine, Order, OrderItem } from "@/lib/types";
+
+/** 현재 소유자(회원/기기)의 구매내역 */
+export async function GET() {
+  const ownerId = await getOwnerId();
+  return NextResponse.json({ orders: listOrdersByOwner(ownerId) });
+}
 
 interface CreateOrderBody {
   items: CartLine[];
@@ -54,9 +61,11 @@ export async function POST(req: Request) {
   }
 
   const amount = orderItems.reduce((s, it) => s + it.unitPrice * it.qty, 0);
+  const ownerId = await getOwnerId();
 
   const order: Order = {
     id: newOrderId(),
+    ownerId,
     items: orderItems,
     amount,
     buyerName,

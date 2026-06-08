@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getOrder, updateOrder } from "@/lib/store";
 import { approve, getKsnetConfig } from "@/lib/ksnet";
+import { issueCouponsForOrder, sendCouponSms } from "@/lib/fulfill";
 
 /**
  * KSNET 결제창 콜백(리턴) 처리.
@@ -31,18 +32,25 @@ async function handle(params: Record<string, string>) {
 
   // 최종 승인요청
   const result = await approve(order, params);
-  updateOrder(order.id, {
-    status: result.success ? "paid" : "failed",
-    payment: result.success
-      ? {
-          provider: "ksnet",
-          tid: result.tid,
-          approvalNo: result.approvalNo,
-          method: result.method,
-          approvedAt: new Date().toISOString(),
-        }
-      : undefined,
-  });
+  if (result.success) {
+    // 쿠폰 코드 자동 발급 + 문자(비즈뿌리오) 발송
+    const issued = issueCouponsForOrder(order);
+    const smsSent = await sendCouponSms(order, issued);
+    updateOrder(order.id, {
+      status: "paid",
+      issuedCoupons: issued,
+      smsSent,
+      payment: {
+        provider: "ksnet",
+        tid: result.tid,
+        approvalNo: result.approvalNo,
+        method: result.method,
+        approvedAt: new Date().toISOString(),
+      },
+    });
+  } else {
+    updateOrder(order.id, { status: "failed" });
+  }
 
   return NextResponse.redirect(`${cfg.baseUrl}/checkout/complete?order=${order.id}`, 303);
 }

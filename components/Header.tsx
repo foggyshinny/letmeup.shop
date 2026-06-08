@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useCart } from "./CartContext";
+import { useAuth } from "./AuthContext";
 
 export default function Header() {
   const { count, ready } = useCart();
+  const { user, ready: authReady, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -34,6 +36,24 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {authReady &&
+            (user ? (
+              <div className="hidden items-center gap-2 sm:flex">
+                <Link href="/account" className="text-sm font-semibold text-ink-muted hover:text-ink">
+                  {user.name}님
+                </Link>
+                <button
+                  onClick={logout}
+                  className="text-sm font-semibold text-ink-muted hover:text-accent"
+                >
+                  로그아웃
+                </button>
+              </div>
+            ) : (
+              <Link href="/login" className="hidden text-sm font-semibold text-ink-muted hover:text-ink sm:inline">
+                로그인
+              </Link>
+            ))}
           <Link
             href="/account/payment-methods"
             className="btn-ghost hidden px-3 py-2 sm:inline-flex"

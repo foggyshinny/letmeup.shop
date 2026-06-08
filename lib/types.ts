@@ -86,6 +86,34 @@ export interface LocationRecord {
   consentedAt: string;
 }
 
+/** 회원 */
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  /** scrypt 해시 (원문 비밀번호는 저장하지 않음) */
+  passwordHash: string;
+  salt: string;
+  createdAt: string;
+}
+
+/** 클라이언트에 노출 가능한 회원 정보 (민감값 제외) */
+export interface PublicUser {
+  id: string;
+  email: string;
+  name: string;
+}
+
+/** 결제 완료 시 자동 발급되는 개별 쿠폰(코드) */
+export interface IssuedCoupon {
+  couponId: string;
+  title: string;
+  /** 사용 가능한 쿠폰 코드 (예: LMU-AB12-CD34-EF56) */
+  code: string;
+  status: "issued" | "used";
+  issuedAt: string;
+}
+
 export type OrderStatus =
   | "pending" // 결제창 진입 전/대기
   | "paid" // 결제 승인 완료
@@ -94,6 +122,8 @@ export type OrderStatus =
 
 export interface Order {
   id: string;
+  /** 주문 소유자: 회원 ID 또는 익명 기기 ID */
+  ownerId: string;
   items: OrderItem[];
   amount: number;
   buyerName: string;
@@ -101,6 +131,10 @@ export interface Order {
   buyerEmail: string;
   status: OrderStatus;
   createdAt: string;
+  /** 결제 완료 시 자동 발급된 쿠폰 코드들 */
+  issuedCoupons?: IssuedCoupon[];
+  /** 쿠폰 코드 문자(비즈뿌리오) 발송 여부 */
+  smsSent?: boolean;
   /** PG 승인 정보 (KSNET) */
   payment?: {
     provider: "ksnet";

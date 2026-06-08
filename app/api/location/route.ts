@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getDeviceId } from "@/lib/device";
+import { getOwnerId } from "@/lib/device";
 import { getLocation, saveLocation } from "@/lib/store";
 import { nearestStores } from "@/lib/places";
 
 export async function GET() {
-  const deviceId = await getDeviceId();
+  const deviceId = await getOwnerId();
   const loc = getLocation(deviceId);
   if (!loc) return NextResponse.json({ location: null, nearby: [] });
   return NextResponse.json({
@@ -15,7 +15,7 @@ export async function GET() {
 
 /** 사용자 동의 후 수집한 위치를 저장하고, 가까운 매장을 반환 */
 export async function POST(req: Request) {
-  const deviceId = await getDeviceId();
+  const deviceId = await getOwnerId();
   let body: { lat?: number; lng?: number; accuracy?: number };
   try {
     body = await req.json();

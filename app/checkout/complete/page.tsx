@@ -73,6 +73,28 @@ export default async function CompletePage({
           ))}
         </div>
 
+        {/* 자동 발급된 쿠폰 코드 */}
+        {ok && order.issuedCoupons && order.issuedCoupons.length > 0 && (
+          <div className="mt-6 rounded-2xl bg-brand-light p-5 text-left">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-bold">🎫 발급된 쿠폰 코드</div>
+              {order.smsSent && <span className="text-xs font-semibold text-brand">문자 발송 완료</span>}
+            </div>
+            <ul className="mt-3 space-y-2">
+              {order.issuedCoupons.map((c, i) => (
+                <li key={i} className="rounded-lg bg-white px-3 py-2">
+                  <div className="text-xs text-ink-muted">{c.title}</div>
+                  <div className="font-mono text-sm font-bold">{c.code}</div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-ink-muted">
+              쿠폰 코드는 입력하신 휴대폰({order.buyerPhone})으로도 발송됩니다.
+              구매내역에서 언제든 다시 확인할 수 있어요.
+            </p>
+          </div>
+        )}
+
         <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:justify-center">
           <Link href="/coupons" className="btn-primary">계속 쇼핑하기</Link>
           <Link href="/" className="btn-ghost">홈으로</Link>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDeviceId } from "@/lib/device";
+import { getOwnerId } from "@/lib/device";
 import { addPaymentMethod, listPaymentMethods, newId } from "@/lib/store";
 import { registerBillingKey } from "@/lib/ksnet";
 import type { PayMethod, SavedPaymentMethod } from "@/lib/types";
@@ -13,7 +13,7 @@ const SIMPLE_PAY_LABEL: Partial<Record<PayMethod, string>> = {
 };
 
 export async function GET() {
-  const deviceId = await getDeviceId();
+  const deviceId = await getOwnerId();
   // 빌링키는 서버 전용 — 클라이언트 응답에서 제거
   const safe = listPaymentMethods(deviceId).map(({ billingKey: _bk, ...rest }) => {
     void _bk;
@@ -23,7 +23,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const deviceId = await getDeviceId();
+  const deviceId = await getOwnerId();
   let body: Record<string, string>;
   try {
     body = await req.json();

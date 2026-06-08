@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDeviceId } from "@/lib/device";
+import { getOwnerId } from "@/lib/device";
 import { getOrder, getPaymentMethod, updateOrder } from "@/lib/store";
 import {
   approve,
@@ -9,6 +9,7 @@ import {
   payWithBillingKey,
 } from "@/lib/ksnet";
 import type { ApprovalResult } from "@/lib/ksnet";
+import { issueCouponsForOrder, sendCouponSms } from "@/lib/fulfill";
 import type { PayMethod } from "@/lib/types";
 
 /**
@@ -37,13 +38,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "이미 결제된 주문입니다." }, { status: 409 });
   }
 
-  const settle = (result: ApprovalResult) => {
+  const settle = async (result: ApprovalResult) => {
     if (!result.success) {
       updateOrder(order.id, { status: "failed" });
       return NextResponse.json({ mode: "settled", approved: false, message: result.message });
     }
+    // 결제 성공 → 쿠폰 코드 자동 발급 + 문자(비즈뿌리오) 발송
+    const issued = issueCouponsForOrder(order);
+    const smsSent = await sendCouponSms(order, issued);
     updateOrder(order.id, {
       status: "paid",
+      issuedCoupons: issued,
+      smsSent,
       payment: {
         provider: "ksnet",
         tid: result.tid,
@@ -57,7 +63,7 @@ export async function POST(req: Request) {
 
   // ── 저장된 카드(빌링키) 자동결제 ──
   if (method === "saved") {
-    const deviceId = await getDeviceId();
+    const deviceId = await getOwnerId();
     const pm = paymentMethodId ? getPaymentMethod(deviceId, paymentMethodId) : undefined;
     if (!pm || !pm.billingKey) {
       return NextResponse.json({ error: "선택한 결제수단을 찾을 수 없습니다." }, { status: 400 });

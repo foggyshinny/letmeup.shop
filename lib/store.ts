@@ -1,4 +1,4 @@
-import type { LocationRecord, Order, SavedPaymentMethod } from "./types";
+import type { LocationRecord, Order, SavedPaymentMethod, User } from "./types";
 
 /**
  * 주문/결제수단/위치 임시 저장소.
@@ -13,9 +13,17 @@ const g = globalThis as unknown as {
   __letmeupOrders?: Map<string, Order>;
   __letmeupPaymentMethods?: Map<string, SavedPaymentMethod[]>;
   __letmeupLocations?: Map<string, LocationRecord>;
+  __letmeupUsers?: Map<string, User>;
+  __letmeupUsersByEmail?: Map<string, string>;
 };
 const orders: Map<string, Order> = g.__letmeupOrders ?? new Map();
 g.__letmeupOrders = orders;
+
+// 회원
+const users: Map<string, User> = g.__letmeupUsers ?? new Map();
+g.__letmeupUsers = users;
+const usersByEmail: Map<string, string> = g.__letmeupUsersByEmail ?? new Map();
+g.__letmeupUsersByEmail = usersByEmail;
 
 // deviceId → 저장된 결제수단 목록
 const paymentMethods: Map<string, SavedPaymentMethod[]> =
@@ -41,6 +49,40 @@ export function updateOrder(id: string, patch: Partial<Order>): Order | undefine
   const next = { ...cur, ...patch };
   orders.set(id, next);
   return next;
+}
+
+/** 특정 소유자(회원 또는 익명 기기)의 주문 목록 (최신순) */
+export function listOrdersByOwner(ownerId: string): Order[] {
+  return [...orders.values()]
+    .filter((o) => o.ownerId === ownerId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+/** 전체 주문 (관리자용, 최신순) */
+export function listAllOrders(): Order[] {
+  return [...orders.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+/** 전체 회원 수 (관리자용) */
+export function countUsers(): number {
+  return users.size;
+}
+
+// ── 회원 ──────────────────────────────────────────────────────────────────
+
+export function createUser(user: User): User {
+  users.set(user.id, user);
+  usersByEmail.set(user.email.toLowerCase(), user.id);
+  return user;
+}
+
+export function getUser(id: string): User | undefined {
+  return users.get(id);
+}
+
+export function getUserByEmail(email: string): User | undefined {
+  const id = usersByEmail.get(email.toLowerCase());
+  return id ? users.get(id) : undefined;
 }
 
 // ── 결제수단 ──────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/components/CartContext";
+import { AuthProvider } from "@/components/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -19,11 +20,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body>
-        <CartProvider>
-          <Header />
-          <main className="min-h-[calc(100vh-var(--header-h))]">{children}</main>
-          <Footer />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Header />
+            <main className="min-h-[calc(100vh-var(--header-h))]">{children}</main>
+            <Footer />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
