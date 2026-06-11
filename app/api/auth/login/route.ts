@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const email = (body.email ?? "").trim().toLowerCase();
   const password = body.password ?? "";
 
-  const user = getUserByEmail(email);
+  const user = await getUserByEmail(email);
   if (!user || !verifyPassword(password, user.salt, user.passwordHash)) {
     return NextResponse.json(
       { error: "이메일 또는 비밀번호가 올바르지 않습니다." },

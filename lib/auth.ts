@@ -59,7 +59,7 @@ export async function getSessionUserId(): Promise<string | null> {
 export async function getCurrentUser(): Promise<User | null> {
   const id = await getSessionUserId();
   if (!id) return null;
-  return getUser(id) ?? null;
+  return (await getUser(id)) ?? null;
 }
 
 export function toPublicUser(u: User): PublicUser {

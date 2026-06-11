@@ -10,7 +10,7 @@ export default async function CompletePage({
   searchParams: Promise<{ order?: string }>;
 }) {
   const { order: orderId } = await searchParams;
-  const order = orderId ? getOrder(orderId) : undefined;
+  const order = orderId ? await getOrder(orderId) : undefined;
 
   if (!order) {
     return (

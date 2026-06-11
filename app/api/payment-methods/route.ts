@@ -15,7 +15,8 @@ const SIMPLE_PAY_LABEL: Partial<Record<PayMethod, string>> = {
 export async function GET() {
   const deviceId = await getOwnerId();
   // 빌링키는 서버 전용 — 클라이언트 응답에서 제거
-  const safe = listPaymentMethods(deviceId).map(({ billingKey: _bk, ...rest }) => {
+  const list = await listPaymentMethods(deviceId);
+  const safe = list.map(({ billingKey: _bk, ...rest }) => {
     void _bk;
     return rest;
   });
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
       label,
       createdAt: new Date().toISOString(),
     };
-    addPaymentMethod(deviceId, pm);
+    await addPaymentMethod(deviceId, pm);
     return NextResponse.json({ paymentMethod: pm });
   }
 
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
     billingKey: result.billingKey, // 카드번호는 저장하지 않음
     createdAt: new Date().toISOString(),
   };
-  addPaymentMethod(deviceId, pm);
+  await addPaymentMethod(deviceId, pm);
 
   // 빌링키는 응답에 노출하지 않음
   const { billingKey: _omit, ...safe } = pm;

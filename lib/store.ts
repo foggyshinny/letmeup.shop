@@ -1,13 +1,35 @@
 import type { LocationRecord, Order, SavedPaymentMethod, User } from "./types";
 
 /**
- * 주문/결제수단/위치 임시 저장소.
+ * 데이터 저장소.
  *
- * 지금은 프로세스 메모리에 보관합니다(개발/데모용). 실제 운영에서는
- * DynamoDB / RDS / Supabase 등으로 교체하세요. 교체 지점은 이 파일의
- * 함수 구현부뿐이며, 호출하는 쪽 코드는 그대로 둘 수 있도록 설계했습니다.
+ * 두 가지 백엔드를 지원합니다(설정에 따라 자동 선택):
+ *  - DYNAMODB_TABLE 환경변수가 있으면 → DynamoDB (운영/영속)
+ *  - 없으면 → 프로세스 인메모리 (개발/데모, 재시작 시 초기화)
+ *
+ * 모든 공개 함수는 async 입니다. 호출부는 await 만 붙이면 백엔드와 무관하게 동작합니다.
  */
 
+export interface StoreBackend {
+  saveOrder(order: Order): Promise<Order>;
+  getOrder(id: string): Promise<Order | undefined>;
+  updateOrder(id: string, patch: Partial<Order>): Promise<Order | undefined>;
+  listOrdersByOwner(ownerId: string): Promise<Order[]>;
+  listAllOrders(): Promise<Order[]>;
+  countUsers(): Promise<number>;
+  createUser(user: User): Promise<User>;
+  getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  listPaymentMethods(owner: string): Promise<SavedPaymentMethod[]>;
+  addPaymentMethod(owner: string, pm: SavedPaymentMethod): Promise<SavedPaymentMethod>;
+  removePaymentMethod(owner: string, id: string): Promise<boolean>;
+  setDefaultPaymentMethod(owner: string, id: string): Promise<boolean>;
+  getPaymentMethod(owner: string, id: string): Promise<SavedPaymentMethod | undefined>;
+  saveLocation(owner: string, rec: LocationRecord): Promise<LocationRecord>;
+  getLocation(owner: string): Promise<LocationRecord | undefined>;
+}
+
+// ── 인메모리 백엔드 ──────────────────────────────────────────────────────────
 // Next dev 환경의 HMR로 모듈이 재평가돼도 데이터가 유지되도록 globalThis에 보관
 const g = globalThis as unknown as {
   __letmeupOrders?: Map<string, Order>;
@@ -16,131 +38,149 @@ const g = globalThis as unknown as {
   __letmeupUsers?: Map<string, User>;
   __letmeupUsersByEmail?: Map<string, string>;
 };
-const orders: Map<string, Order> = g.__letmeupOrders ?? new Map();
-g.__letmeupOrders = orders;
+const orders: Map<string, Order> = (g.__letmeupOrders ??= new Map());
+const users: Map<string, User> = (g.__letmeupUsers ??= new Map());
+const usersByEmail: Map<string, string> = (g.__letmeupUsersByEmail ??= new Map());
+const paymentMethods: Map<string, SavedPaymentMethod[]> = (g.__letmeupPaymentMethods ??= new Map());
+const locations: Map<string, LocationRecord> = (g.__letmeupLocations ??= new Map());
 
-// 회원
-const users: Map<string, User> = g.__letmeupUsers ?? new Map();
-g.__letmeupUsers = users;
-const usersByEmail: Map<string, string> = g.__letmeupUsersByEmail ?? new Map();
-g.__letmeupUsersByEmail = usersByEmail;
+const memStore: StoreBackend = {
+  async saveOrder(order) {
+    orders.set(order.id, order);
+    return order;
+  },
+  async getOrder(id) {
+    return orders.get(id);
+  },
+  async updateOrder(id, patch) {
+    const cur = orders.get(id);
+    if (!cur) return undefined;
+    const next = { ...cur, ...patch };
+    orders.set(id, next);
+    return next;
+  },
+  async listOrdersByOwner(ownerId) {
+    return [...orders.values()]
+      .filter((o) => o.ownerId === ownerId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+  async listAllOrders() {
+    return [...orders.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+  async countUsers() {
+    return users.size;
+  },
+  async createUser(user) {
+    users.set(user.id, user);
+    usersByEmail.set(user.email.toLowerCase(), user.id);
+    return user;
+  },
+  async getUser(id) {
+    return users.get(id);
+  },
+  async getUserByEmail(email) {
+    const id = usersByEmail.get(email.toLowerCase());
+    return id ? users.get(id) : undefined;
+  },
+  async listPaymentMethods(owner) {
+    return paymentMethods.get(owner) ?? [];
+  },
+  async addPaymentMethod(owner, pm) {
+    const list = paymentMethods.get(owner) ?? [];
+    if (list.length === 0) pm.isDefault = true;
+    list.push(pm);
+    paymentMethods.set(owner, list);
+    return pm;
+  },
+  async removePaymentMethod(owner, id) {
+    const list = paymentMethods.get(owner) ?? [];
+    const next = list.filter((p) => p.id !== id);
+    if (next.length === list.length) return false;
+    if (!next.some((p) => p.isDefault) && next[0]) next[0].isDefault = true;
+    paymentMethods.set(owner, next);
+    return true;
+  },
+  async setDefaultPaymentMethod(owner, id) {
+    const list = paymentMethods.get(owner) ?? [];
+    if (!list.some((p) => p.id === id)) return false;
+    list.forEach((p) => (p.isDefault = p.id === id));
+    paymentMethods.set(owner, list);
+    return true;
+  },
+  async getPaymentMethod(owner, id) {
+    return (paymentMethods.get(owner) ?? []).find((p) => p.id === id);
+  },
+  async saveLocation(owner, rec) {
+    locations.set(owner, rec);
+    return rec;
+  },
+  async getLocation(owner) {
+    return locations.get(owner);
+  },
+};
 
-// deviceId → 저장된 결제수단 목록
-const paymentMethods: Map<string, SavedPaymentMethod[]> =
-  g.__letmeupPaymentMethods ?? new Map();
-g.__letmeupPaymentMethods = paymentMethods;
-
-// deviceId → 마지막 수집 위치
-const locations: Map<string, LocationRecord> = g.__letmeupLocations ?? new Map();
-g.__letmeupLocations = locations;
-
-export function saveOrder(order: Order): Order {
-  orders.set(order.id, order);
-  return order;
+// ── 백엔드 선택 ──────────────────────────────────────────────────────────────
+let backendPromise: Promise<StoreBackend> | null = null;
+function backend(): Promise<StoreBackend> {
+  if (!backendPromise) {
+    backendPromise = process.env.DYNAMODB_TABLE
+      ? import("./dynamo").then((m) => m.createDynamoStore())
+      : Promise.resolve(memStore);
+  }
+  return backendPromise;
 }
 
-export function getOrder(id: string): Order | undefined {
-  return orders.get(id);
+// ── 공개 API (백엔드로 위임) ─────────────────────────────────────────────────
+export async function saveOrder(order: Order) {
+  return (await backend()).saveOrder(order);
+}
+export async function getOrder(id: string) {
+  return (await backend()).getOrder(id);
+}
+export async function updateOrder(id: string, patch: Partial<Order>) {
+  return (await backend()).updateOrder(id, patch);
+}
+export async function listOrdersByOwner(ownerId: string) {
+  return (await backend()).listOrdersByOwner(ownerId);
+}
+export async function listAllOrders() {
+  return (await backend()).listAllOrders();
+}
+export async function countUsers() {
+  return (await backend()).countUsers();
+}
+export async function createUser(user: User) {
+  return (await backend()).createUser(user);
+}
+export async function getUser(id: string) {
+  return (await backend()).getUser(id);
+}
+export async function getUserByEmail(email: string) {
+  return (await backend()).getUserByEmail(email);
+}
+export async function listPaymentMethods(owner: string) {
+  return (await backend()).listPaymentMethods(owner);
+}
+export async function addPaymentMethod(owner: string, pm: SavedPaymentMethod) {
+  return (await backend()).addPaymentMethod(owner, pm);
+}
+export async function removePaymentMethod(owner: string, id: string) {
+  return (await backend()).removePaymentMethod(owner, id);
+}
+export async function setDefaultPaymentMethod(owner: string, id: string) {
+  return (await backend()).setDefaultPaymentMethod(owner, id);
+}
+export async function getPaymentMethod(owner: string, id: string) {
+  return (await backend()).getPaymentMethod(owner, id);
+}
+export async function saveLocation(owner: string, rec: LocationRecord) {
+  return (await backend()).saveLocation(owner, rec);
+}
+export async function getLocation(owner: string) {
+  return (await backend()).getLocation(owner);
 }
 
-export function updateOrder(id: string, patch: Partial<Order>): Order | undefined {
-  const cur = orders.get(id);
-  if (!cur) return undefined;
-  const next = { ...cur, ...patch };
-  orders.set(id, next);
-  return next;
-}
-
-/** 특정 소유자(회원 또는 익명 기기)의 주문 목록 (최신순) */
-export function listOrdersByOwner(ownerId: string): Order[] {
-  return [...orders.values()]
-    .filter((o) => o.ownerId === ownerId)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-}
-
-/** 전체 주문 (관리자용, 최신순) */
-export function listAllOrders(): Order[] {
-  return [...orders.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-}
-
-/** 전체 회원 수 (관리자용) */
-export function countUsers(): number {
-  return users.size;
-}
-
-// ── 회원 ──────────────────────────────────────────────────────────────────
-
-export function createUser(user: User): User {
-  users.set(user.id, user);
-  usersByEmail.set(user.email.toLowerCase(), user.id);
-  return user;
-}
-
-export function getUser(id: string): User | undefined {
-  return users.get(id);
-}
-
-export function getUserByEmail(email: string): User | undefined {
-  const id = usersByEmail.get(email.toLowerCase());
-  return id ? users.get(id) : undefined;
-}
-
-// ── 결제수단 ──────────────────────────────────────────────────────────────
-
-export function listPaymentMethods(deviceId: string): SavedPaymentMethod[] {
-  return paymentMethods.get(deviceId) ?? [];
-}
-
-export function addPaymentMethod(
-  deviceId: string,
-  pm: SavedPaymentMethod,
-): SavedPaymentMethod {
-  const list = paymentMethods.get(deviceId) ?? [];
-  // 첫 등록이면 기본 결제수단으로 지정
-  if (list.length === 0) pm.isDefault = true;
-  list.push(pm);
-  paymentMethods.set(deviceId, list);
-  return pm;
-}
-
-export function removePaymentMethod(deviceId: string, id: string): boolean {
-  const list = paymentMethods.get(deviceId) ?? [];
-  const next = list.filter((p) => p.id !== id);
-  if (next.length === list.length) return false;
-  // 기본 결제수단을 지웠다면 남은 것 중 첫 번째를 기본으로
-  if (!next.some((p) => p.isDefault) && next[0]) next[0].isDefault = true;
-  paymentMethods.set(deviceId, next);
-  return true;
-}
-
-export function setDefaultPaymentMethod(deviceId: string, id: string): boolean {
-  const list = paymentMethods.get(deviceId) ?? [];
-  if (!list.some((p) => p.id === id)) return false;
-  list.forEach((p) => (p.isDefault = p.id === id));
-  paymentMethods.set(deviceId, list);
-  return true;
-}
-
-export function getPaymentMethod(
-  deviceId: string,
-  id: string,
-): SavedPaymentMethod | undefined {
-  return (paymentMethods.get(deviceId) ?? []).find((p) => p.id === id);
-}
-
-// ── 위치 ──────────────────────────────────────────────────────────────────
-
-export function saveLocation(deviceId: string, rec: LocationRecord): LocationRecord {
-  locations.set(deviceId, rec);
-  return rec;
-}
-
-export function getLocation(deviceId: string): LocationRecord | undefined {
-  return locations.get(deviceId);
-}
-
-// ── ID 생성 ────────────────────────────────────────────────────────────────
-
+// ── ID 생성 (순수 함수, 동기) ────────────────────────────────────────────────
 export function newId(prefix: string): string {
   return prefix + Math.random().toString(36).slice(2, 12).toUpperCase();
 }

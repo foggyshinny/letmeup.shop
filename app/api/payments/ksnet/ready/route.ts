@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   }
 
   const { orderId, method = "card", paymentMethodId } = body;
-  const order = orderId ? getOrder(orderId) : undefined;
+  const order = orderId ? await getOrder(orderId) : undefined;
   if (!order) {
     return NextResponse.json({ error: "주문을 찾을 수 없습니다." }, { status: 404 });
   }
@@ -40,13 +40,13 @@ export async function POST(req: Request) {
 
   const settle = async (result: ApprovalResult) => {
     if (!result.success) {
-      updateOrder(order.id, { status: "failed" });
+      await updateOrder(order.id, { status: "failed" });
       return NextResponse.json({ mode: "settled", approved: false, message: result.message });
     }
     // 결제 성공 → 쿠폰 코드 자동 발급 + 문자(비즈뿌리오) 발송
     const issued = issueCouponsForOrder(order);
     const smsSent = await sendCouponSms(order, issued);
-    updateOrder(order.id, {
+    await updateOrder(order.id, {
       status: "paid",
       issuedCoupons: issued,
       smsSent,
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
   // ── 저장된 카드(빌링키) 자동결제 ──
   if (method === "saved") {
     const deviceId = await getOwnerId();
-    const pm = paymentMethodId ? getPaymentMethod(deviceId, paymentMethodId) : undefined;
+    const pm = paymentMethodId ? await getPaymentMethod(deviceId, paymentMethodId) : undefined;
     if (!pm || !pm.billingKey) {
       return NextResponse.json({ error: "선택한 결제수단을 찾을 수 없습니다." }, { status: 400 });
     }

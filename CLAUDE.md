@@ -71,14 +71,21 @@ middleware.ts  익명 기기 쿠키(lmu_did) 보장
 public/legacy/ 기존 키오스크 랜딩(정적) 보존
 ```
 
-## 데이터 / 상태 — ⚠️ 가장 먼저 알아야 할 것
+## 데이터 / 상태
 
-**모든 데이터는 `lib/store.ts`의 프로세스 인메모리(Map)에 저장된다.**
-서버를 재시작하면 회원·주문·결제수단·위치가 모두 사라진다(개발/데모용).
+`lib/store.ts`는 **비동기 공개 API**이며, 환경변수에 따라 백엔드를 자동 선택한다:
 
-→ **운영 전환 시 최우선 작업**: `lib/store.ts`의 함수 구현부를 실제 DB
-(DynamoDB / RDS / Supabase 등)로 교체. 호출부(라우트/페이지)는 함수 시그니처를
-유지하면 그대로 둘 수 있도록 설계되어 있다.
+- `DYNAMODB_TABLE` 가 있으면 → **DynamoDB** (`lib/dynamo.ts`, 운영/영속)
+- 없으면 → **프로세스 인메모리** (개발/데모, 재시작 시 초기화)
+
+DynamoDB는 **단일 테이블 + GSI("gsi1")** 구조다. 키 설계는 `lib/dynamo.ts` 상단 주석 참고.
+모든 store 함수는 async이므로 호출부는 `await`만 붙이면 백엔드와 무관하게 동작한다.
+
+**테이블 생성**: `npm run db:create-table` (환경변수 `DYNAMODB_TABLE`, `AWS_REGION`).
+로컬 테스트는 DynamoDB Local + `DYNAMODB_ENDPOINT=http://localhost:8000`.
+
+> 관리자 통계의 `listAllOrders`/`countUsers`는 Scan 기반이라 데이터가 많아지면
+> 전용 GSI나 집계 테이블로 개선 필요(현재는 데모/저volume 가정).
 
 ## 인증 모델
 
@@ -127,13 +134,14 @@ public/legacy/ 기존 키오스크 랜딩(정적) 보존
 
 ## 남은 작업(TODO) — 우선순위 순
 
-1. **인메모리 → 실제 DB 이관** (`lib/store.ts`) — 운영 필수
+1. ~~인메모리 → 실제 DB 이관~~ ✅ DynamoDB 백엔드 구현됨(`lib/dynamo.ts`). 배포 시 테이블 생성 + `DYNAMODB_TABLE` 설정.
 2. KSNET/비즈뿌리오/Authy 실연동값 주입 및 규격 매핑
 3. 쿠폰 **사용처리(코드 검증/차감) API**
 4. 환불/주문취소
 5. 관리자에서 쿠폰 상품 등록·재고 관리(현재 `lib/data.ts` 시드)
 6. 회원 비밀번호 재설정
 7. 사업자 정보(푸터의 `○○○`) 실제 값 반영
+8. 관리자 통계 Scan → GSI/집계로 개선 (대량 데이터 시)
 
 ## 배포 메모
 

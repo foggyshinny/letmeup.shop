@@ -7,7 +7,7 @@ import type { CartLine, Order, OrderItem } from "@/lib/types";
 /** 현재 소유자(회원/기기)의 구매내역 */
 export async function GET() {
   const ownerId = await getOwnerId();
-  return NextResponse.json({ orders: listOrdersByOwner(ownerId) });
+  return NextResponse.json({ orders: await listOrdersByOwner(ownerId) });
 }
 
 interface CreateOrderBody {
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     createdAt: new Date().toISOString(),
   };
 
-  saveOrder(order);
+  await saveOrder(order);
 
   return NextResponse.json({ orderId: order.id, amount: order.amount });
 }

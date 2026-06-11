@@ -18,11 +18,11 @@ const STATUS_LABEL: Record<string, { text: string; cls: string }> = {
 export default async function AdminDashboard() {
   if (!(await isAdmin())) redirect("/admin/login");
 
-  const orders = listAllOrders();
+  const orders = await listAllOrders();
   const paid = orders.filter((o) => o.status === "paid");
   const revenue = paid.reduce((s, o) => s + o.amount, 0);
   const issuedCount = paid.reduce((s, o) => s + (o.issuedCoupons?.length ?? 0), 0);
-  const users = countUsers();
+  const users = await countUsers();
   const admin = getAdminConfig();
 
   const integrations = [

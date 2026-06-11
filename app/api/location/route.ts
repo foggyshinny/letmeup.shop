@@ -5,7 +5,7 @@ import { nearestStores } from "@/lib/places";
 
 export async function GET() {
   const deviceId = await getOwnerId();
-  const loc = getLocation(deviceId);
+  const loc = await getLocation(deviceId);
   if (!loc) return NextResponse.json({ location: null, nearby: [] });
   return NextResponse.json({
     location: loc,
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "좌표가 올바르지 않습니다." }, { status: 400 });
   }
 
-  const rec = saveLocation(deviceId, {
+  const rec = await saveLocation(deviceId, {
     lat,
     lng,
     accuracy,

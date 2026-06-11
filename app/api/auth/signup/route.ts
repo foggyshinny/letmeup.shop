@@ -25,11 +25,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "이메일 형식을 확인해 주세요." }, { status: 400 });
   if (password.length < 8)
     return NextResponse.json({ error: "비밀번호는 8자 이상이어야 합니다." }, { status: 400 });
-  if (getUserByEmail(email))
+  if (await getUserByEmail(email))
     return NextResponse.json({ error: "이미 가입된 이메일입니다." }, { status: 409 });
 
   const { hash, salt } = hashPassword(password);
-  const user = createUser({
+  const user = await createUser({
     id: newId("U"),
     email,
     name,

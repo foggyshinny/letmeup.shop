@@ -8,7 +8,7 @@ export async function DELETE(
 ) {
   const { id } = await params;
   const deviceId = await getOwnerId();
-  const ok = removePaymentMethod(deviceId, id);
+  const ok = await removePaymentMethod(deviceId, id);
   if (!ok) return NextResponse.json({ error: "결제수단을 찾을 수 없습니다." }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
@@ -19,7 +19,7 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const deviceId = await getOwnerId();
-  const ok = setDefaultPaymentMethod(deviceId, id);
+  const ok = await setDefaultPaymentMethod(deviceId, id);
   if (!ok) return NextResponse.json({ error: "결제수단을 찾을 수 없습니다." }, { status: 404 });
   return NextResponse.json({ ok: true });
 }

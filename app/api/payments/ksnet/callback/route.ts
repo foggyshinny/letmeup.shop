@@ -16,7 +16,7 @@ import { issueCouponsForOrder, sendCouponSms } from "@/lib/fulfill";
 async function handle(params: Record<string, string>) {
   const cfg = getKsnetConfig();
   const orderId = params.orderNo ?? params.ordrIdxx ?? params.orderId ?? "";
-  const order = getOrder(orderId);
+  const order = await getOrder(orderId);
 
   if (!order) {
     return NextResponse.redirect(`${cfg.baseUrl}/checkout/complete?order=${orderId}`, 303);
@@ -26,7 +26,7 @@ async function handle(params: Record<string, string>) {
   const authFailed =
     params.resultCode && params.resultCode !== "0000" && params.resultCode !== "success";
   if (authFailed) {
-    updateOrder(order.id, { status: "failed" });
+    await updateOrder(order.id, { status: "failed" });
     return NextResponse.redirect(`${cfg.baseUrl}/checkout/complete?order=${order.id}`, 303);
   }
 
@@ -36,7 +36,7 @@ async function handle(params: Record<string, string>) {
     // 쿠폰 코드 자동 발급 + 문자(비즈뿌리오) 발송
     const issued = issueCouponsForOrder(order);
     const smsSent = await sendCouponSms(order, issued);
-    updateOrder(order.id, {
+    await updateOrder(order.id, {
       status: "paid",
       issuedCoupons: issued,
       smsSent,
@@ -49,7 +49,7 @@ async function handle(params: Record<string, string>) {
       },
     });
   } else {
-    updateOrder(order.id, { status: "failed" });
+    await updateOrder(order.id, { status: "failed" });
   }
 
   return NextResponse.redirect(`${cfg.baseUrl}/checkout/complete?order=${order.id}`, 303);
