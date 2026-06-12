@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { coupons } from "@/lib/data";
+import { listByCategory } from "@/lib/catalog";
 
-export function GET(req: Request) {
+export const dynamic = "force-dynamic";
+
+export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const category = searchParams.get("category");
-  const list = category ? coupons.filter((c) => c.category === category) : coupons;
-  return NextResponse.json({ coupons: list });
+  const category = searchParams.get("category") ?? undefined;
+  return NextResponse.json({ coupons: await listByCategory(category) });
 }

@@ -37,31 +37,43 @@ Node 22 / npm 10 기준. `.nvmrc` 참고.
 ```
 app/
   layout.tsx, page.tsx          # 레이아웃(Auth/Cart Provider) + 홈
-  coupons/                      # 목록 / [id] 상세
+  coupons/                      # 목록 / [id] 상세 (시드 + 판매자 상품 병합)
   cart/ checkout/ checkout/complete/
   account/                      # 마이페이지, orders(구매내역), payment-methods(지갑)
   login/ signup/
-  sell/                         # 판매자 입점 신청
+  sell/                         # 파트너 입점 안내(랜딩) → /partner/*로 연결
+  partner/                      # ★ 판매자(파트너) 센터
+    login/ signup/              #   판매자 로그인 / 입점 신청
+    page.tsx                    #   대시보드(매출·정산·내 상품)
+    products/new/ [id]/edit/    #   상품 등록·수정
+    settings/                   #   담당자 정보·정산 계좌
   admin/ admin/login/           # 관리자 대시보드 + Authy 로그인
+  admin/sellers/                #   판매자 승인·정지 관리
   api/
     auth/        signup·login·logout·me
+    partner/     signup·login·logout·me·settings·products[/id]
     orders/      GET(내역)·POST(생성)
-    coupons/
+    coupons/     GET(시드+판매자 상품 병합)
     payment-methods/ [id]/
     location/
     payments/ksnet/ ready·callback
-    admin/       login·logout·setup
+    admin/       login·logout·setup·sellers/[id](승인/정지)
 components/                     # Header, Footer, CartContext, AuthContext,
                                 # CouponCard, AddToCart, PayMethodSelector,
-                                # NearbyStores, AdminLogoutButton
+                                # NearbyStores, AdminLogoutButton,
+                                # Partner*(ProductForm/ProductActions/SettingsForm/LogoutButton),
+                                # AdminSellerActions
 lib/
-  types.ts     도메인 타입(단일 출처)
-  data.ts      쿠폰/카테고리 시드 데이터
+  types.ts     도메인 타입(단일 출처) — Coupon/User/Order/Seller 등
+  data.ts      쿠폰/카테고리 시드 데이터(플랫폼 직접 상품)
+  catalog.ts   ★ 시드 + 판매자 상품 병합 카탈로그 (서버 전용, async)
+  product.ts   판매자 상품 입력 검증/정규화 + 썸네일 옵션
   places.ts    매장 위치 시드 + 거리(하버사인)
-  store.ts     ★ 인메모리 저장소 (orders/users/paymentMethods/locations)
+  store.ts     ★ 저장소 공개 API (orders/users/paymentMethods/locations/sellers/products)
   format.ts    won(), classNames()
   device.ts    getDeviceId() / getOwnerId()
   auth.ts      회원 비번 해시(scrypt)·세션(HMAC)
+  seller.ts    판매자 세션(lmu_seller)·수수료율
   admin.ts     관리자 설정·세션
   totp.ts      RFC6238 TOTP(Authy 호환, 무의존)
   ksnet.ts     KSNET 결제/빌링키 어댑터
@@ -92,8 +104,21 @@ DynamoDB는 **단일 테이블 + GSI("gsi1")** 구조다. 키 설계는 `lib/dyn
 - **회원**: 세션 쿠키 `lmu_session` = `userId.HMAC(AUTH_SECRET)`. 비번은 scrypt 해시.
 - **소유자 키(getOwnerId)**: 로그인 시 회원ID, 비로그인 시 익명 기기ID(`lmu_did`).
   주문·결제수단·위치를 이 키로 분리·조회한다.
+- **판매자(파트너)**: 별도 쿠키 `lmu_seller` = `seller:<id>.HMAC(AUTH_SECRET)`.
+  비번은 회원과 동일한 scrypt(`lib/auth.ts`) 재사용. 입점 신청 시 `pending`,
+  관리자 승인 시 `approved`가 되어야 상품 등록 가능. `lib/seller.ts` 참고.
 - **관리자**: 별도 쿠키 `lmu_admin`. 아이디·비밀번호 + **Authy(TOTP) 2차 인증**.
   `lib/totp.ts`는 외부 의존성 없이 RFC6238 구현 → Authy/Google Authenticator 호환.
+
+## 마켓플레이스(판매자) 모델
+
+- 상품(`Coupon`)은 두 출처가 **카탈로그(`lib/catalog.ts`)에서 병합**된다:
+  시드(`lib/data.ts`, `sellerId` 없음) + 판매자 등록 상품(저장소, `sellerId` 보유).
+- 노출은 `status !== "inactive"`인 상품만. 서버(페이지/라우트)는 `lib/catalog.ts`를
+  통해 읽고, 클라이언트(장바구니/결제)는 `/api/coupons`로 병합 목록을 받는다.
+- 주문 금액은 항상 서버에서 `catalog.findCoupon`으로 **재계산**(클라이언트 값 불신).
+- 정산: 판매자 대시보드가 결제완료 주문에서 자기 상품 매출을 집계하고
+  수수료율(`commissionRate`, 기본 10%)을 적용해 정산 예정액을 보여준다.
 
 ## 외부 연동 & 환경변수
 
@@ -138,10 +163,11 @@ DynamoDB는 **단일 테이블 + GSI("gsi1")** 구조다. 키 설계는 `lib/dyn
 2. KSNET/비즈뿌리오/Authy 실연동값 주입 및 규격 매핑
 3. 쿠폰 **사용처리(코드 검증/차감) API**
 4. 환불/주문취소
-5. 관리자에서 쿠폰 상품 등록·재고 관리(현재 `lib/data.ts` 시드)
+5. ~~판매자 상품 등록·관리~~ ✅ 파트너 센터(`/partner/*`)에서 판매자가 직접 등록·수정.
+   남은 것: 결제 성공 시 **재고 차감**(현재 시드/판매자 상품 모두 미차감), 판매자별 **정산 실행/이체** 연동.
 6. 회원 비밀번호 재설정
 7. 사업자 정보(푸터의 `○○○`) 실제 값 반영
-8. 관리자 통계 Scan → GSI/집계로 개선 (대량 데이터 시)
+8. 관리자 통계 Scan → GSI/집계로 개선 (대량 데이터 시). 판매자 매출 집계도 현재 전체 주문 Scan.
 
 ## 배포 메모
 

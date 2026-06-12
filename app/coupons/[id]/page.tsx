@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { coupons, getCoupon, getCategory, discountRate } from "@/lib/data";
+import { getCategory, discountRate } from "@/lib/data";
+import { findCoupon, listCatalog } from "@/lib/catalog";
 import { won } from "@/lib/format";
 import AddToCart from "@/components/AddToCart";
 import CouponCard from "@/components/CouponCard";
 
-export function generateStaticParams() {
-  return coupons.map((c) => ({ id: c.id }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -16,7 +15,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const c = getCoupon(id);
+  const c = await findCoupon(id);
   if (!c) return { title: "쿠폰을 찾을 수 없습니다 — letmeup.shop" };
   return { title: `${c.title} — letmeup.shop`, description: c.summary };
 }
@@ -27,12 +26,12 @@ export default async function CouponDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const coupon = getCoupon(id);
+  const coupon = await findCoupon(id);
   if (!coupon) notFound();
 
   const cat = getCategory(coupon.category);
   const rate = discountRate(coupon);
-  const related = coupons
+  const related = (await listCatalog())
     .filter((c) => c.category === coupon.category && c.id !== coupon.id)
     .slice(0, 4);
 

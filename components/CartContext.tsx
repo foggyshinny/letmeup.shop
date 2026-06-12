@@ -2,14 +2,13 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
-import type { CartLine } from "@/lib/types";
-import { coupons } from "@/lib/data";
+import type { CartLine, Coupon } from "@/lib/types";
+import { coupons as seedCoupons } from "@/lib/data";
 
 interface CartContextValue {
   lines: CartLine[];
@@ -20,6 +19,8 @@ interface CartContextValue {
   clear: () => void;
   subtotal: number;
   ready: boolean;
+  /** 병합된 카탈로그(시드 + 판매자 상품)에서 상품 조회 */
+  findCoupon: (couponId: string) => Coupon | undefined;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -28,6 +29,8 @@ const STORAGE_KEY = "letmeup_cart_v1";
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
+  // 시드 + 판매자 상품을 병합한 카탈로그 (서버 /api/coupons 에서 로드)
+  const [catalog, setCatalog] = useState<Coupon[]>(seedCoupons);
 
   // 초기 로드 (localStorage)
   useEffect(() => {
@@ -39,6 +42,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setReady(true);
   }, []);
+
+  // 병합된 카탈로그 로드 (판매자 상품 포함). 실패 시 시드 유지.
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/coupons")
+      .then((r) => r.json())
+      .then((d) => {
+        if (alive && Array.isArray(d.coupons) && d.coupons.length > 0) {
+          setCatalog(d.coupons);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const findCoupon = useMemo(() => {
+    const map = new Map(catalog.map((c) => [c.id, c]));
+    return (id: string) => map.get(id);
+  }, [catalog]);
 
   // 변경 시 저장
   useEffect(() => {
@@ -75,10 +99,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const subtotal = useMemo(
     () =>
       lines.reduce((s, l) => {
-        const c = coupons.find((x) => x.id === l.couponId);
+        const c = findCoupon(l.couponId);
         return s + (c ? c.price * l.qty : 0);
       }, 0),
-    [lines],
+    [lines, findCoupon],
   );
 
   const value: CartContextValue = {
@@ -90,6 +114,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     clear,
     subtotal,
     ready,
+    findCoupon,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -1,11 +1,15 @@
 import Link from "next/link";
 import CouponCard from "@/components/CouponCard";
 import NearbyStores from "@/components/NearbyStores";
-import { categories, coupons } from "@/lib/data";
+import { categories } from "@/lib/data";
+import { listCatalog } from "@/lib/catalog";
 
-export default function HomePage() {
-  const featured = coupons.filter((c) => c.featured);
-  const deals = [...coupons]
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const catalog = await listCatalog();
+  const featured = catalog.filter((c) => c.featured);
+  const deals = [...catalog]
     .sort((a, b) => b.listPrice - b.price - (a.listPrice - a.price))
     .slice(0, 8);
 
@@ -124,7 +128,7 @@ export default function HomePage() {
               브랜드·매장 사장님이라면 letmeup.shop에 입점해 새로운 고객을 만나보세요.
             </p>
           </div>
-          <Link href="/sell" className="btn-accent shrink-0">
+          <Link href="/partner/signup" className="btn-accent shrink-0">
             입점 신청하기
           </Link>
         </div>

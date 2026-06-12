@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin, getAdminConfig } from "@/lib/admin";
-import { countUsers, listAllOrders } from "@/lib/store";
+import { countUsers, listAllOrders, listSellers } from "@/lib/store";
 import { isLive as ksnetLive } from "@/lib/ksnet";
 import { smsConfigured } from "@/lib/sms";
 import { won } from "@/lib/format";
@@ -23,6 +24,8 @@ export default async function AdminDashboard() {
   const revenue = paid.reduce((s, o) => s + o.amount, 0);
   const issuedCount = paid.reduce((s, o) => s + (o.issuedCoupons?.length ?? 0), 0);
   const users = await countUsers();
+  const sellers = await listSellers();
+  const pendingSellers = sellers.filter((s) => s.status === "pending").length;
   const admin = getAdminConfig();
 
   const integrations = [
@@ -36,6 +39,8 @@ export default async function AdminDashboard() {
     { label: "결제완료 주문", value: `${paid.length}건` },
     { label: "발급 쿠폰", value: `${issuedCount}장` },
     { label: "가입 회원", value: `${users}명` },
+    { label: "입점 판매자", value: `${sellers.length}곳` },
+    { label: "승인 대기", value: `${pendingSellers}곳` },
   ];
 
   return (
@@ -45,7 +50,17 @@ export default async function AdminDashboard() {
           <h1 className="text-3xl font-extrabold">관리자 대시보드</h1>
           <p className="mt-1 text-sm text-ink-muted">letmeup.shop 운영 현황</p>
         </div>
-        <AdminLogoutButton />
+        <div className="flex items-center gap-2">
+          <Link href="/admin/sellers" className="btn-ghost">
+            판매자 관리
+            {pendingSellers > 0 && (
+              <span className="ml-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[11px] font-bold text-white">
+                {pendingSellers}
+              </span>
+            )}
+          </Link>
+          <AdminLogoutButton />
+        </div>
       </div>
 
       {/* 통계 */}

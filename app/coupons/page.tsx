@@ -1,7 +1,10 @@
 import Link from "next/link";
 import CouponCard from "@/components/CouponCard";
-import { categories, coupons, getCategory } from "@/lib/data";
+import { categories, getCategory } from "@/lib/data";
+import { listByCategory } from "@/lib/catalog";
 import { classNames } from "@/lib/format";
+
+export const dynamic = "force-dynamic";
 
 export default async function CouponsPage({
   searchParams,
@@ -11,7 +14,7 @@ export default async function CouponsPage({
   const { category, sort } = await searchParams;
   const activeCat = category && getCategory(category) ? category : undefined;
 
-  let list = coupons.filter((c) => (activeCat ? c.category === activeCat : true));
+  let list = await listByCategory(activeCat);
 
   if (sort === "price") list = [...list].sort((a, b) => a.price - b.price);
   else if (sort === "discount")

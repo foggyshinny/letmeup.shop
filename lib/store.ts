@@ -1,4 +1,11 @@
-import type { LocationRecord, Order, SavedPaymentMethod, User } from "./types";
+import type {
+  Coupon,
+  LocationRecord,
+  Order,
+  SavedPaymentMethod,
+  Seller,
+  User,
+} from "./types";
 
 /**
  * 데이터 저장소.
@@ -27,6 +34,19 @@ export interface StoreBackend {
   getPaymentMethod(owner: string, id: string): Promise<SavedPaymentMethod | undefined>;
   saveLocation(owner: string, rec: LocationRecord): Promise<LocationRecord>;
   getLocation(owner: string): Promise<LocationRecord | undefined>;
+  // ── 판매자(파트너) ──
+  createSeller(seller: Seller): Promise<Seller>;
+  getSeller(id: string): Promise<Seller | undefined>;
+  getSellerByEmail(email: string): Promise<Seller | undefined>;
+  updateSeller(id: string, patch: Partial<Seller>): Promise<Seller | undefined>;
+  listSellers(): Promise<Seller[]>;
+  // ── 판매자 상품 ──
+  saveProduct(product: Coupon): Promise<Coupon>;
+  getProduct(id: string): Promise<Coupon | undefined>;
+  updateProduct(id: string, patch: Partial<Coupon>): Promise<Coupon | undefined>;
+  deleteProduct(id: string): Promise<boolean>;
+  listProductsBySeller(sellerId: string): Promise<Coupon[]>;
+  listAllProducts(): Promise<Coupon[]>;
 }
 
 // ── 인메모리 백엔드 ──────────────────────────────────────────────────────────
@@ -37,12 +57,18 @@ const g = globalThis as unknown as {
   __letmeupLocations?: Map<string, LocationRecord>;
   __letmeupUsers?: Map<string, User>;
   __letmeupUsersByEmail?: Map<string, string>;
+  __letmeupSellers?: Map<string, Seller>;
+  __letmeupSellersByEmail?: Map<string, string>;
+  __letmeupProducts?: Map<string, Coupon>;
 };
 const orders: Map<string, Order> = (g.__letmeupOrders ??= new Map());
 const users: Map<string, User> = (g.__letmeupUsers ??= new Map());
 const usersByEmail: Map<string, string> = (g.__letmeupUsersByEmail ??= new Map());
 const paymentMethods: Map<string, SavedPaymentMethod[]> = (g.__letmeupPaymentMethods ??= new Map());
 const locations: Map<string, LocationRecord> = (g.__letmeupLocations ??= new Map());
+const sellers: Map<string, Seller> = (g.__letmeupSellers ??= new Map());
+const sellersByEmail: Map<string, string> = (g.__letmeupSellersByEmail ??= new Map());
+const products: Map<string, Coupon> = (g.__letmeupProducts ??= new Map());
 
 const memStore: StoreBackend = {
   async saveOrder(order) {
@@ -117,6 +143,57 @@ const memStore: StoreBackend = {
   async getLocation(owner) {
     return locations.get(owner);
   },
+  // ── 판매자 ──
+  async createSeller(seller) {
+    sellers.set(seller.id, seller);
+    sellersByEmail.set(seller.email.toLowerCase(), seller.id);
+    return seller;
+  },
+  async getSeller(id) {
+    return sellers.get(id);
+  },
+  async getSellerByEmail(email) {
+    const id = sellersByEmail.get(email.toLowerCase());
+    return id ? sellers.get(id) : undefined;
+  },
+  async updateSeller(id, patch) {
+    const cur = sellers.get(id);
+    if (!cur) return undefined;
+    const next = { ...cur, ...patch };
+    sellers.set(id, next);
+    return next;
+  },
+  async listSellers() {
+    return [...sellers.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+  // ── 판매자 상품 ──
+  async saveProduct(product) {
+    products.set(product.id, product);
+    return product;
+  },
+  async getProduct(id) {
+    return products.get(id);
+  },
+  async updateProduct(id, patch) {
+    const cur = products.get(id);
+    if (!cur) return undefined;
+    const next = { ...cur, ...patch };
+    products.set(id, next);
+    return next;
+  },
+  async deleteProduct(id) {
+    return products.delete(id);
+  },
+  async listProductsBySeller(sellerId) {
+    return [...products.values()]
+      .filter((p) => p.sellerId === sellerId)
+      .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
+  },
+  async listAllProducts() {
+    return [...products.values()].sort((a, b) =>
+      (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
+    );
+  },
 };
 
 // ── 백엔드 선택 ──────────────────────────────────────────────────────────────
@@ -178,6 +255,41 @@ export async function saveLocation(owner: string, rec: LocationRecord) {
 }
 export async function getLocation(owner: string) {
   return (await backend()).getLocation(owner);
+}
+// ── 판매자 ──
+export async function createSeller(seller: Seller) {
+  return (await backend()).createSeller(seller);
+}
+export async function getSeller(id: string) {
+  return (await backend()).getSeller(id);
+}
+export async function getSellerByEmail(email: string) {
+  return (await backend()).getSellerByEmail(email);
+}
+export async function updateSeller(id: string, patch: Partial<Seller>) {
+  return (await backend()).updateSeller(id, patch);
+}
+export async function listSellers() {
+  return (await backend()).listSellers();
+}
+// ── 판매자 상품 ──
+export async function saveProduct(product: Coupon) {
+  return (await backend()).saveProduct(product);
+}
+export async function getProduct(id: string) {
+  return (await backend()).getProduct(id);
+}
+export async function updateProduct(id: string, patch: Partial<Coupon>) {
+  return (await backend()).updateProduct(id, patch);
+}
+export async function deleteProduct(id: string) {
+  return (await backend()).deleteProduct(id);
+}
+export async function listProductsBySeller(sellerId: string) {
+  return (await backend()).listProductsBySeller(sellerId);
+}
+export async function listAllProducts() {
+  return (await backend()).listAllProducts();
 }
 
 // ── ID 생성 (순수 함수, 동기) ────────────────────────────────────────────────

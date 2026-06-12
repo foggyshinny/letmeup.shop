@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { useCart } from "@/components/CartContext";
-import { coupons } from "@/lib/data";
 import { won } from "@/lib/format";
 
 export default function CartPage() {
-  const { lines, setQty, remove, subtotal, ready } = useCart();
+  const { lines, setQty, remove, subtotal, ready, findCoupon } = useCart();
 
   if (!ready) {
     return <div className="container-page py-16 text-center text-ink-muted">불러오는 중…</div>;
@@ -24,7 +23,7 @@ export default function CartPage() {
   }
 
   const items = lines
-    .map((l) => ({ line: l, coupon: coupons.find((c) => c.id === l.couponId) }))
+    .map((l) => ({ line: l, coupon: findCoupon(l.couponId) }))
     .filter((x): x is { line: typeof x.line; coupon: NonNullable<typeof x.coupon> } => !!x.coupon);
 
   return (

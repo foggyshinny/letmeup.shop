@@ -31,7 +31,7 @@ export default function Header() {
             기프트카드
           </Link>
           <Link href="/sell" className="hover:text-ink">
-            입점 신청
+            파트너 입점
           </Link>
         </nav>
 

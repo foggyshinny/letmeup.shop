@@ -32,11 +32,17 @@ export interface Coupon {
   usage: string[];
   /** 재고 수량 (null = 무제한) */
   stock: number | null;
-  /** 판매자 (마켓플레이스 확장용) */
+  /** 판매자 표시명 (상호/브랜드). 마켓플레이스 노출용 */
   seller: string;
   badges: string[];
   /** 추천/인기 노출 */
   featured?: boolean;
+  /** 판매자(파트너) ID. 시드/플랫폼 직접 상품은 비어 있음 */
+  sellerId?: string;
+  /** 판매 상태. 미지정(시드)은 active 취급 */
+  status?: "active" | "inactive";
+  /** 등록 일시(ISO). 시드는 비어 있을 수 있음 */
+  createdAt?: string;
 }
 
 export interface CartLine {
@@ -102,6 +108,61 @@ export interface PublicUser {
   id: string;
   email: string;
   name: string;
+}
+
+/** 판매자(파트너) 입점 상태 */
+export type SellerStatus =
+  | "pending" // 입점 신청 접수, 승인 대기
+  | "approved" // 승인됨 (상품 판매 가능)
+  | "suspended"; // 정지
+
+/** 정산 계좌 정보 */
+export interface SettlementAccount {
+  bank: string;
+  account: string;
+  holder: string;
+}
+
+/** 판매자(파트너) 계정 */
+export interface Seller {
+  id: string;
+  /** 로그인 이메일 */
+  email: string;
+  /** 담당자명 */
+  name: string;
+  /** 상호 / 브랜드명 (스토어 노출명) */
+  businessName: string;
+  /** 사업자등록번호 (선택) */
+  bizNo?: string;
+  phone: string;
+  /** scrypt 해시 (원문 비밀번호는 저장하지 않음) */
+  passwordHash: string;
+  salt: string;
+  status: SellerStatus;
+  /** 판매 수수료율 (0~1). 기본 0.1 = 10% */
+  commissionRate: number;
+  /** 정산 계좌 */
+  settlement?: SettlementAccount;
+  /** 입점 소개 */
+  intro?: string;
+  createdAt: string;
+  approvedAt?: string;
+}
+
+/** 클라이언트에 노출 가능한 판매자 정보 (민감값 제외) */
+export interface PublicSeller {
+  id: string;
+  email: string;
+  name: string;
+  businessName: string;
+  bizNo?: string;
+  phone: string;
+  status: SellerStatus;
+  commissionRate: number;
+  settlement?: SettlementAccount;
+  intro?: string;
+  createdAt: string;
+  approvedAt?: string;
 }
 
 /** 결제 완료 시 자동 발급되는 개별 쿠폰(코드) */

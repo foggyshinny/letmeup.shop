@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCoupon } from "@/lib/data";
+import { findCoupon } from "@/lib/catalog";
 import { listOrdersByOwner, newOrderId, saveOrder } from "@/lib/store";
 import { getOwnerId } from "@/lib/device";
 import type { CartLine, Order, OrderItem } from "@/lib/types";
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   // 금액은 서버 데이터 기준으로 재계산 (클라이언트 값 신뢰하지 않음)
   const orderItems: OrderItem[] = [];
   for (const line of items) {
-    const coupon = getCoupon(line.couponId);
+    const coupon = await findCoupon(line.couponId);
     if (!coupon) {
       return NextResponse.json(
         { error: `존재하지 않는 쿠폰입니다: ${line.couponId}` },

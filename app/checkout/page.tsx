@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/components/CartContext";
 import PayMethodSelector, { type PaySelection } from "@/components/PayMethodSelector";
-import { coupons } from "@/lib/data";
 import { won } from "@/lib/format";
 
 export default function CheckoutPage() {
-  const { lines, subtotal, clear, ready } = useCart();
+  const { lines, subtotal, clear, ready, findCoupon } = useCart();
   const router = useRouter();
   const [form, setForm] = useState({ name: "", phone: "", email: "", agree: false });
   const [pay, setPay] = useState<PaySelection>({ method: "card" });
@@ -17,7 +16,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
 
   const items = lines
-    .map((l) => ({ line: l, coupon: coupons.find((c) => c.id === l.couponId) }))
+    .map((l) => ({ line: l, coupon: findCoupon(l.couponId) }))
     .filter((x): x is { line: typeof x.line; coupon: NonNullable<typeof x.coupon> } => !!x.coupon);
 
   if (ready && lines.length === 0) {

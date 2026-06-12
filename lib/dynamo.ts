@@ -8,7 +8,14 @@ import {
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import type { StoreBackend } from "./store";
-import type { LocationRecord, Order, SavedPaymentMethod, User } from "./types";
+import type {
+  Coupon,
+  LocationRecord,
+  Order,
+  SavedPaymentMethod,
+  Seller,
+  User,
+} from "./types";
 
 /**
  * DynamoDB 단일 테이블 저장소.
@@ -28,6 +35,8 @@ import type { LocationRecord, Order, SavedPaymentMethod, User } from "./types";
  *   회원      pk=USER#<id>   sk=USER    gsi1pk=EMAIL#<email>   gsi1sk=USER
  *   결제수단  pk=PM#<owner>  sk=PM#<id>
  *   위치      pk=LOC#<owner> sk=LOC
+ *   판매자    pk=SELLER#<id> sk=SELLER  gsi1pk=SELLEREMAIL#<email> gsi1sk=SELLER
+ *   상품      pk=PRODUCT#<id> sk=PRODUCT gsi1pk=SELLER#<sellerId>  gsi1sk=<createdAt>
  *   (도메인 객체는 data 속성에 통째로 보관)
  */
 
@@ -214,6 +223,120 @@ export function createDynamoStore(): StoreBackend {
         new GetCommand({ TableName: table, Key: { pk: `LOC#${owner}`, sk: "LOC" } }),
       );
       return (r.Item as Item<LocationRecord> | undefined)?.data;
+    },
+
+    // ── 판매자 ──
+    async createSeller(seller: Seller) {
+      await put({
+        pk: `SELLER#${seller.id}`,
+        sk: "SELLER",
+        gsi1pk: `SELLEREMAIL#${seller.email.toLowerCase()}`,
+        gsi1sk: "SELLER",
+        type: "seller",
+        data: seller,
+      });
+      return seller;
+    },
+    async getSeller(id: string) {
+      const r = await doc.send(
+        new GetCommand({ TableName: table, Key: { pk: `SELLER#${id}`, sk: "SELLER" } }),
+      );
+      return (r.Item as Item<Seller> | undefined)?.data;
+    },
+    async getSellerByEmail(email: string) {
+      const r = await doc.send(
+        new QueryCommand({
+          TableName: table,
+          IndexName: "gsi1",
+          KeyConditionExpression: "gsi1pk = :p",
+          ExpressionAttributeValues: { ":p": `SELLEREMAIL#${email.toLowerCase()}` },
+          Limit: 1,
+        }),
+      );
+      return (r.Items as Item<Seller>[] | undefined)?.[0]?.data;
+    },
+    async updateSeller(id: string, patch: Partial<Seller>) {
+      const cur = await this.getSeller(id);
+      if (!cur) return undefined;
+      const next = { ...cur, ...patch };
+      await this.createSeller(next);
+      return next;
+    },
+    async listSellers() {
+      const r = await doc.send(
+        new ScanCommand({
+          TableName: table,
+          FilterExpression: "#t = :t",
+          ExpressionAttributeNames: { "#t": "type" },
+          ExpressionAttributeValues: { ":t": "seller" },
+        }),
+      );
+      return (
+        (r.Items as Item<Seller>[] | undefined)
+          ?.map((i) => i.data)
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt)) ?? []
+      );
+    },
+
+    // ── 판매자 상품 ──
+    async saveProduct(product: Coupon) {
+      await put({
+        pk: `PRODUCT#${product.id}`,
+        sk: "PRODUCT",
+        gsi1pk: `SELLER#${product.sellerId ?? "PLATFORM"}`,
+        gsi1sk: product.createdAt ?? new Date().toISOString(),
+        type: "product",
+        data: product,
+      });
+      return product;
+    },
+    async getProduct(id: string) {
+      const r = await doc.send(
+        new GetCommand({ TableName: table, Key: { pk: `PRODUCT#${id}`, sk: "PRODUCT" } }),
+      );
+      return (r.Item as Item<Coupon> | undefined)?.data;
+    },
+    async updateProduct(id: string, patch: Partial<Coupon>) {
+      const cur = await this.getProduct(id);
+      if (!cur) return undefined;
+      const next = { ...cur, ...patch };
+      await this.saveProduct(next);
+      return next;
+    },
+    async deleteProduct(id: string) {
+      const cur = await this.getProduct(id);
+      if (!cur) return false;
+      await doc.send(
+        new DeleteCommand({ TableName: table, Key: { pk: `PRODUCT#${id}`, sk: "PRODUCT" } }),
+      );
+      return true;
+    },
+    async listProductsBySeller(sellerId: string) {
+      const r = await doc.send(
+        new QueryCommand({
+          TableName: table,
+          IndexName: "gsi1",
+          KeyConditionExpression: "gsi1pk = :p",
+          ExpressionAttributeValues: { ":p": `SELLER#${sellerId}` },
+          ScanIndexForward: false,
+        }),
+      );
+      return (r.Items as Item<Coupon>[] | undefined)?.map((i) => i.data) ?? [];
+    },
+    async listAllProducts() {
+      const r = await doc.send(
+        new ScanCommand({
+          TableName: table,
+          FilterExpression: "#t = :t",
+          ExpressionAttributeNames: { "#t": "type" },
+          ExpressionAttributeValues: { ":t": "product" },
+        }),
+      );
+      return (
+        (r.Items as Item<Coupon>[] | undefined)
+          ?.map((i) => i.data)
+          .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")) ?? []
+      );
     },
   };
 }
