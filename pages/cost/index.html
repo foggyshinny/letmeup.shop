@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5VFX76T7');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>비용 알아보기 · 렛미업 스터디카페 키오스크</title>
+<meta name="description" content="렛미업 키오스크 비용은 도입비·월 수수료·업데이트까지 투명하게. 숨은 비용 없이, 우리 매장에 맞는 정확한 견적을 1분 만에 문의하세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f6f7f9;
+  --bg-dark: #0e1116;
+  --ink: #0e1116;
+  --ink-2: #2a2f37;
+  --ink-3: #5b626d;
+  --ink-4: #9aa1ac;
+  --line: #e6e8ec;
+  --line-2: #dde0e6;
+  --brand: #13C4D3;
+  --brand-dark: #0BA5B2;
+  --brand-soft: #E6FAFC;
+  --brand-deep: #07303B;
+  --accent: #F5A05B;
+  --accent-soft: #fff1e3;
+  --mint: #5BB948;
+  --green: #16a34a;
+  --shadow-1: 0 1px 2px rgba(14,17,22,0.04), 0 1px 0 rgba(14,17,22,0.02);
+  --shadow-2: 0 12px 32px rgba(14,17,22,0.08), 0 2px 4px rgba(14,17,22,0.04);
+  --shadow-3: 0 24px 64px rgba(14,17,22,0.12);
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --radius-xl: 32px;
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Pretendard', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.7;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: 17px;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+img { max-width: 100%; display: block; }
+
+.kw { font-weight: 800; color: var(--ink); }
+.kw-brand { font-weight: 800; color: var(--brand-dark); }
+.kw-accent { font-weight: 800; color: var(--accent); }
+.kw-mark {
+  font-weight: 800;
+  background: linear-gradient(180deg, transparent 60%, rgba(19,196,211,0.25) 60%, rgba(19,196,211,0.25) 92%, transparent 92%);
+  padding: 0 2px;
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+/* ===== NAV ===== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line);
+  z-index: 100;
+  height: 64px;
+}
+.nav-inner {
+  max-width: 1100px; margin: 0 auto; padding: 0 24px;
+  height: 100%; display: flex; align-items: center; justify-content: space-between;
+}
+.logo { display: flex; align-items: center; gap: 8px; }
+.logo-img { height: 22px; width: auto; display: block; }
+.nav-right { display: flex; align-items: center; gap: 18px; }
+.nav-link { font-size: 15px; font-weight: 600; color: var(--ink-2); transition: color .15s ease; }
+.nav-link:hover { color: var(--brand-dark); }
+.nav-cta {
+  background: var(--ink);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px; font-weight: 600;
+  transition: transform .15s ease, background .15s ease;
+}
+.nav-cta:hover { background: var(--brand); transform: translateY(-1px); }
+
+/* ===== BUTTONS ===== */
+.btn {
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-size: 16px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all .2s ease;
+  letter-spacing: -0.01em;
+}
+.btn-primary { background: var(--ink); color: white; box-shadow: 0 8px 24px rgba(14,17,22,0.18); }
+.btn-primary:hover { background: var(--brand); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(19,196,211,0.35); }
+.btn-secondary { background: white; color: var(--ink); border: 1px solid var(--line-2); }
+.btn-secondary:hover { border-color: var(--ink); transform: translateY(-2px); }
+.btn-arrow { display: inline-block; transition: transform .2s ease; }
+.btn:hover .btn-arrow { transform: translateX(4px); }
+
+/* ===== HERO ===== */
+.hero {
+  padding: 150px 0 80px;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(1100px 520px at 50% -180px, rgba(19,196,211,0.10), transparent 60%),
+    var(--bg);
+  text-align: center;
+}
+.eyebrow {
+  display: inline-block;
+  font-size: 13px; font-weight: 800;
+  color: var(--brand-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  font-family: var(--font-display);
+  padding: 8px 16px;
+  background: rgba(19,196,211,0.12);
+  border-radius: 999px;
+}
+.hero h1 {
+  font-size: clamp(34px, 5.4vw, 60px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  margin-bottom: 22px;
+}
+.hero .lead {
+  font-size: clamp(17px, 1.5vw, 21px);
+  color: var(--ink-2);
+  max-width: 640px;
+  margin: 0 auto 36px;
+  line-height: 1.7;
+}
+.hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+/* ===== SECTION ===== */
+.section { padding: 100px 0; }
+.section.soft { background: var(--bg-soft); }
+.section-head { text-align: center; margin-bottom: 56px; }
+.section-tag {
+  display: inline-block;
+  font-size: 13px; font-weight: 800;
+  color: var(--brand-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  font-family: var(--font-display);
+  padding: 8px 16px;
+  background: rgba(19,196,211,0.12);
+  border-radius: 999px;
+}
+.section-title {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  margin-bottom: 18px;
+}
+.section-sub { font-size: clamp(16px, 1.3vw, 19px); color: var(--ink-3); max-width: 640px; margin: 0 auto; }
+
+/* ===== COST CARDS ===== */
+.cost-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.cost-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  padding: 36px 30px;
+  box-shadow: var(--shadow-1);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.cost-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-2); }
+.cost-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: var(--brand-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; margin-bottom: 20px;
+}
+.cost-card h3 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+.cost-card .cost-line { font-size: 15px; color: var(--ink-3); line-height: 1.6; }
+.cost-badge {
+  display: inline-block; margin-bottom: 14px;
+  font-size: 13px; font-weight: 800; color: var(--mint);
+  background: rgba(91,185,72,0.12); padding: 5px 12px; border-radius: 999px;
+}
+
+/* ===== NO HIDDEN FEE LIST ===== */
+.nofee { max-width: 760px; margin: 0 auto; }
+.nofee-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: white; border: 1px solid var(--line);
+  border-radius: var(--radius-m); padding: 20px 24px; margin-bottom: 14px;
+  box-shadow: var(--shadow-1);
+}
+.nofee-check {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--brand); color: white; font-weight: 800; font-size: 15px;
+  display: flex; align-items: center; justify-content: center; margin-top: 2px;
+}
+.nofee-item strong { font-weight: 800; }
+.nofee-item p { color: var(--ink-3); font-size: 15px; margin-top: 3px; }
+
+/* ===== FINAL CTA ===== */
+.final-cta { background: var(--bg-dark); color: white; text-align: center; padding: 110px 0; }
+.final-cta h2 {
+  font-size: clamp(30px, 4.4vw, 50px);
+  font-weight: 900; letter-spacing: -0.04em; line-height: 1.14; margin-bottom: 18px;
+}
+.final-cta h2 .hl {
+  background: linear-gradient(135deg, #ffffff 0%, #4DDDE9 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.final-cta p { font-size: 19px; color: rgba(255,255,255,0.75); margin: 0 auto 40px; max-width: 580px; line-height: 1.65; }
+.final-cta .hero-cta { margin-bottom: 22px; }
+.final-cta .btn-primary { background: white; color: var(--ink); }
+.final-cta .btn-primary:hover { background: var(--brand); color: white; }
+.final-cta .btn-secondary { background: transparent; border-color: rgba(255,255,255,0.25); color: white; }
+.final-cta .btn-secondary:hover { border-color: white; }
+.final-cta .tel-note { font-size: 15px; color: rgba(255,255,255,0.6); }
+.final-cta .tel-note strong { color: white; font-weight: 700; }
+
+/* ===== FOOTER ===== */
+.footer {
+  background: var(--ink); color: rgba(255,255,255,0.5);
+  padding: 56px 0 40px; font-size: 13px; line-height: 1.7;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.footer-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 28px; flex-wrap: wrap; gap: 28px;
+}
+.footer-logo-img { height: 26px; width: auto; display: block; filter: brightness(0) invert(1); margin-bottom: 12px; }
+.footer-tel { color: rgba(255,255,255,0.85); font-weight: 600; font-size: 18px; }
+.footer-info p { margin-bottom: 4px; font-size: 12px; }
+
+@media (max-width: 900px) {
+  .section { padding: 70px 0; }
+  .hero { padding: 120px 0 60px; }
+  .cost-grid { grid-template-columns: 1fr; }
+  .nav-link { display: none; }
+}
+</style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5VFX76T7" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="logo">
+      <img src="/assets/logo-letmeup.svg" alt="렛미업" class="logo-img">
+    </a>
+    <div class="nav-right">
+      <a href="/" class="nav-link">홈</a>
+      <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="nav-cta" data-cta="nav_inquiry">문의하기 →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow">비용 알아보기</span>
+    <h1>키오스크 비용,<br><span class="kw-mark">숨김 없이</span> 알려드립니다</h1>
+    <p class="lead">도입비부터 월 수수료, 업데이트까지 — 사장님이 매달 손해 보던 항목만 다시 설계했습니다. 우리 매장에 맞는 <span class="kw-brand">정확한 견적</span>을 1분 만에 받아보세요.</p>
+    <div class="hero-cta">
+      <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="btn btn-primary" data-cta="hero_inquiry">문의하기 <span class="btn-arrow">→</span></a>
+      <a href="#cost" class="btn btn-secondary">비용 구조 보기</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COST STRUCTURE ===== -->
+<section class="section" id="cost">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">비용 구조</span>
+      <h2 class="section-title">렛미업은 이 세 가지를 다시 설계했습니다</h2>
+      <p class="section-sub">기존 키오스크에서 사장님이 가장 손해 보던 항목입니다.</p>
+    </div>
+    <div class="cost-grid">
+      <div class="cost-card">
+        <div class="cost-icon">🏷️</div>
+        <span class="cost-badge">초기 부담 ↓</span>
+        <h3>도입 비용</h3>
+        <p class="cost-line">매장 규모·구성(키오스크 대수, 출입/좌석 연동)에 따라 산정합니다. 꼭 필요한 구성만 담아 <strong>초기 부담을 낮췄습니다</strong>.</p>
+      </div>
+      <div class="cost-card">
+        <div class="cost-icon">💳</div>
+        <span class="cost-badge">투명한 기준</span>
+        <h3>월 이용료 · 수수료</h3>
+        <p class="cost-line">매달 빠져나가는 비용은 <strong>기준을 명확히</strong> 안내합니다. 약정·구성에 따라 달라지는 부분까지 가입 전에 모두 설명드립니다.</p>
+      </div>
+      <div class="cost-card">
+        <div class="cost-icon">🔄</div>
+        <span class="cost-badge">추가비 없음</span>
+        <h3>업데이트</h3>
+        <p class="cost-line">기능 개선·새 기능은 <strong>추가 비용 없이</strong> 제공합니다. "업데이트 받으려면 또 결제"하던 구조를 없앴습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NO HIDDEN FEES ===== -->
+<section class="section soft">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">숨은 비용 점검</span>
+      <h2 class="section-title">"이런 비용, 또 내고 계셨나요?"</h2>
+      <p class="section-sub">렛미업은 이런 항목으로 따로 청구하지 않습니다.</p>
+    </div>
+    <div class="nofee">
+      <div class="nofee-item">
+        <div class="nofee-check">✓</div>
+        <div><strong>업데이트 때마다 추가 결제</strong><p>새 기능·개선은 기본 제공. 받을 때마다 돈 내지 않습니다.</p></div>
+      </div>
+      <div class="nofee-item">
+        <div class="nofee-check">✓</div>
+        <div><strong>과한 결제 수수료</strong><p>결제 수수료 기준을 투명하게 안내하고, 매장 상황에 맞게 상담합니다.</p></div>
+      </div>
+      <div class="nofee-item">
+        <div class="nofee-check">✓</div>
+        <div><strong>장기 약정에 묶인 위약금 부담</strong><p>약정 조건은 가입 전에 명확히. 모르고 묶이는 일이 없게 합니다.</p></div>
+      </div>
+      <div class="nofee-item">
+        <div class="nofee-check">✓</div>
+        <div><strong>사소한 설정 변경에도 출장·기능비</strong><p>운영 중 필요한 설정 변경은 원격으로 빠르게 지원합니다.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FINAL CTA ===== -->
+<section class="final-cta">
+  <div class="container">
+    <h2>우리 매장 비용,<br><span class="hl">1분이면 알 수 있어요</span></h2>
+    <p>매장 규모와 원하는 구성만 알려주시면, 군더더기 없는 정확한 견적을 바로 안내해 드립니다.</p>
+    <div class="hero-cta">
+      <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="btn btn-primary" data-cta="final_inquiry">문의하기 <span class="btn-arrow">→</span></a>
+      <a href="tel:1688-4264" class="btn btn-secondary" data-cta="final_call">전화 상담 1688-4264</a>
+    </div>
+    <p class="tel-note">평일 상담 가능 · <strong>Tel. 1688-4264</strong></p>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div>
+        <img src="/assets/logo-letmeup.svg" alt="렛미업" class="footer-logo-img">
+        <div class="footer-tel">Tel. 1688-4264</div>
+      </div>
+      <div class="footer-info">
+        <p><strong style="color:rgba(255,255,255,0.7);">샘랩주식회사</strong> · 대표 심세용 · 경기도 시흥시 은계중앙로 362, 수림프라자 902호, 1001호</p>
+        <p>사업자등록번호 531-87-00830 · 통신판매업 신고번호 2019-경기안산-0776</p>
+      </div>
+    </div>
+    <p>© 2026 샘랩주식회사. All rights reserved.</p>
+  </div>
+</footer>
+</body>
+</html>
