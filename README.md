@@ -1,102 +1,131 @@
-# letmeup.shop — 쿠폰 할인 마켓
+# letmeup.shop — 렛미업 랜딩페이지 (작업 인계 패키지)
 
-스터디카페 이용권부터 카페·외식·뷰티·문화·기프트카드까지, 할인 쿠폰을 판매하는
-커머스 사이트입니다. 할인/기프트 쿠폰 판매를 메인으로, 판매자 입점(마켓플레이스)
-확장을 염두에 두고 설계했습니다.
-
-- **프레임워크**: Next.js 15 (App Router) + TypeScript + Tailwind CSS
-- **결제**: KSNET PG 연동 (환경변수 미설정 시 자동으로 모의 결제 모드)
-- **배포**: AWS Amplify Hosting (`amplify.yml`)
+> 스터디카페 사장님 타깃 마케팅 랜딩페이지. 정적 페이지이며 동적 처리는 필요 없습니다.
+> 코워크 / Claude Code는 이 문서를 먼저 읽고 작업을 이어가세요.
 
 ---
 
-## 빠른 시작
+## 1. 무엇인가
 
-```bash
-npm install
-cp .env.example .env.local   # 필요시 값 채우기 (없어도 모의 결제로 동작)
-npm run dev                  # http://localhost:3000
-```
-
-프로덕션 빌드:
-
-```bash
-npm run build && npm start
-```
+- **목적**: 스터디카페를 운영 중이거나 곧 창업할 **사장님 개인**에게 렛미업 무인 키오스크를 소개하고 도입 상담으로 전환시키는 랜딩페이지
+- **핵심 메시지**: "지금 쓰는 키오스크, 바꾸고 싶어도 못 바꾸셨죠? 도입비·수수료·업데이트 — 사장님이 매달 손해 보던 것만 다시 설계했습니다."
+- **참조 구조**: `lp.classup.io/homepage-zero` (같은 톤·구성)
+- **브랜드 컬러**: 렛미업 시안 `#13C4D3` (메인) / 오렌지 `#F5A05B` / 그린 `#5BB948`
+- **폰트**: Pretendard(본문) + Plus Jakarta Sans(영문 라벨), Google Fonts CDN
 
 ---
 
-## 화면 구성
+## 2. 파일 구성
 
-| 경로 | 설명 |
+```
+cowork_package/
+├── index.html                      # 단일 자족 버전 (이미지·SVG·CSS·JS 전부 내장, 262KB)
+│                                   #   → 어디든 올리면 바로 동작. 외부 의존 없음(폰트 CDN 제외)
+├── index.assets-separated.html     # 자산 분리 버전 (75KB) + assets/ 폴더 참조
+│                                   #   → 이미지 교체가 잦을 때 이 버전 사용 권장
+├── assets/
+│   ├── logo-letmeup.svg            # 렛미업 공식 로고 (헤더/푸터)
+│   ├── icon-kiosk.svg              # 키오스크 아이콘 (시안)
+│   ├── icon-cursor.svg             # 커서 아이콘 (시안)
+│   ├── icon-face.svg               # 얼굴인식 아이콘 (그린)
+│   ├── icon-ticket.svg             # 이용권 아이콘 (오렌지)
+│   ├── admin-payment.webp          # 관리자 웹 - 결제 내역 (Hero 우측 비주얼)
+│   ├── admin-seats.webp            # 관리자 웹 - 좌석 배치 (Features 쇼케이스1)
+│   ├── user-main.webp              # 사용자 키오스크 - 메인 (Features 쇼케이스2)
+│   └── user-payment.webp           # 사용자 키오스크 - 결제 (Features hero카드)
+└── README.md                       # 이 문서
+```
+
+**둘 중 하나만 쓰면 됩니다.**
+- 그냥 빨리 배포 → `index.html` 하나만 올리면 끝
+- 이미지/문구 자주 교체 → `index.assets-separated.html` + `assets/` 폴더 함께 배포
+
+---
+
+## 3. 페이지 섹션 구성 (위→아래 순서)
+
+| # | 섹션 | 내용 |
+|---|------|------|
+| 1 | **Nav** | 렛미업 로고 + "무료 상담 받기" 버튼 (fixed) |
+| 2 | **Hero** | 3단 위계 헤드라인("지금 쓰는 키오스크"=작게 취소선 / "바꾸고 싶어도"=중간 / "못 바꾸셨죠?"=거대+시안밴드) + 우측 관리자 대시보드 비주얼(3D 틸트) |
+| 3 | **Stats** | 카운트업 4지표: 120억 / 12만명 / 360대 / 1,825일 (스크롤 진입 시 0→목표값 애니메이션) |
+| 4 | **Problems** | 사장님 페인포인트 4가지 (불만 / 수수료 / 업데이트 정체 / 교체비용) |
+| 5 | **Compare** | "새 키오스크가 0원인 이유" + Before/After SVG 비주얼(낡은 키오스크 vs 부활한 렛미업, 0원 배지) + 비용 비교표(220만/10만/3% vs 0원부터/업계최저) |
+| 6 | **AdoptOptions** | 도입 3방법: ①기존 키오스크 업그레이드 ②부담 없는 태블릿 키오스크(추천) ③법적 부담 없는 베리어프리 |
+| 7 | **Pillars** | 차별점 3축: 도입비 0원 / 어디서든 휴대폰 / 매달 업데이트 |
+| 8 | **Features** | 쇼케이스2(관리자 좌석배치 + 사용자 키오스크) + 기능 그리드(결제수단 hero카드 + 좌석/매출/모바일앱) |
+| 9 | **Testimonials** | 사장님 후기 3건 |
+| 10 | **Process** | 도입 3단계 (상담 → 설치·이전 → 운영 시작) |
+| 11 | **Faq** | 자주 묻는 질문 7개 (아코디언) |
+| 12 | **FinalCta** | "이제 사장님도 바꿀 수 있습니다" + 전화/이메일 |
+| 13 | **Footer** | 샘랩주식회사 정보 |
+| - | **FloatingCta** | 하단 고정 "도입 문의하기" (모바일=풀폭바 / 데스크=우하단 / FinalCTA 보이면 자동 숨김) |
+
+---
+
+## 4. ⚠️ 남은 작업 (TODO)
+
+### A. 와섬라립(···)으로 비워둔 수치 — 실제 값으로 교체 필요
+파일에서 `···` 를 검색하면 전부 나옵니다.
+
+- [ ] **Problems 04**: "새 키오스크 한 대 사려면 ···만 원"
+- [ ] **AdoptOptions 옵션2**: 설치 기간 "약 ···일"
+- [ ] **AdoptOptions 옵션3**: 설치 기간 "약 ···일"
+- [ ] **Testimonials**: "···만 원", "운영 ···년차", "···개월", "···지점", "···스터디카페" (후기 3건의 익명 처리 부분 — 실제 상호/숫자 넣을지 결정)
+- [ ] **Faq 설치 기간**: "평균 ···일 이내"
+
+### B. 대표님이 새로 주실 예정 (현재 임시 상태)
+- [ ] **AdoptOptions 카드 그림/번호**: 현재 SVG 아이콘 사용 중. 대표님이 새 이미지(키오스크 실제 사진 등) 제공 예정 → `assets/`에 넣고 `index.assets-separated.html`의 `.adopt-visual-icon img src` 교체
+- [ ] **옵션 카드 이미지 크게**: 새 이미지 받으면 `.adopt-visual` 영역 크기 조정
+
+### C. 검토 필요
+- [ ] **CTA 연락처**: 현재 전화 `1688-4264`, 이메일 `samlab@samlab.co.kr` — 렛미업 전용 번호/채널톡/카카오 상담으로 교체할지 확인
+- [ ] **추적 코드**: classup처럼 GTM(`GTM-P9GD9RPR`) 또는 별도 컨테이너 삽입 여부 — 메타 픽셀 연동 시 데이터 무결성 원칙 준수(표준 이벤트만)
+- [ ] **베리어프리 사양**: 옵션3의 점자/음성/고대비 등 실제 제품 사양과 대조 확인
+
+---
+
+## 5. 수정 가이드 (자주 건드릴 부분)
+
+### 텍스트 문구 수정
+`index.html`(또는 분리버전)을 열어 해당 한글 문구를 직접 검색·수정. 마크업 단순함.
+
+### 색상 변경
+파일 상단 `<style>` 안 `:root` 블록의 CSS 변수만 바꾸면 전체 반영:
+```css
+--brand: #13C4D3;       /* 메인 시안 */
+--accent: #F5A05B;      /* 오렌지 */
+--mint: #5BB948;        /* 그린 */
+```
+
+### 이미지 교체 (분리버전 기준)
+`assets/` 폴더의 같은 파일명으로 덮어쓰기. webp 권장(용량↓). 키오스크 실제 사진은 4:3 비율 권장.
+
+### 핵심 키워드 강조
+본문에서 `<span class="kw">...</span>`(굵게), `kw-brand`(시안), `kw-accent`(오렌지), `kw-mark`(시안 형광펜), `kw-mark-orange`(오렌지 형광펜) 클래스 사용.
+
+---
+
+## 6. 배포
+
+정적 파일이므로 어디든 가능:
+- 기존 서버 정적 경로에 업로드
+- Vercel / Netlify: 폴더째 드래그 또는 git 연동
+- S3 + CloudFront: `index.html`을 루트 도큐먼트로
+
+> **lp.classup.io와 같은 Next.js 프로젝트에 통합하려는 경우**:
+> 동적 기능이 없으므로 컴포넌트화 불필요. 프로젝트 `public/` 에 `index.html`을 정적 파일로 넣고 라우팅만 연결하거나, `pages/letmeup-zero.js`에서 `dangerouslySetInnerHTML`로 임베드하면 충분합니다.
+
+---
+
+## 7. 자산 출처 (모두 letmeup.co.kr 공식)
+
+| 자산 | 원본 |
 |------|------|
-| `/` | 홈 — 히어로, 카테고리, 인기/할인율 쿠폰 |
-| `/coupons` | 전체 쿠폰 목록 (카테고리 필터 + 정렬) |
-| `/coupons/[id]` | 쿠폰 상세 — 가격·유효기간·사용법, 장바구니/바로구매 |
-| `/cart` | 장바구니 (localStorage 기반) |
-| `/checkout` | 구매자 정보 입력 → 결제 진행 |
-| `/checkout/complete` | 결제 완료/실패 결과 |
-| `/sell` | 판매자 입점 신청 (마켓플레이스 확장) |
-| `/legacy/index.html` | 기존 렛미업 키오스크 소개 랜딩페이지 (보존) |
-
-## API
-
-| 경로 | 메서드 | 설명 |
-|------|--------|------|
-| `/api/coupons` | GET | 쿠폰 목록 (`?category=` 필터) |
-| `/api/orders` | POST | 주문 생성 (금액은 **서버에서 재계산**) |
-| `/api/payments/ksnet/ready` | POST | 결제 준비 — 실거래 시 결제창 폼, 모의 시 즉시 승인 |
-| `/api/payments/ksnet/callback` | GET/POST | KSNET 결제창 콜백 → 승인 후 완료 페이지로 리다이렉트 |
+| 로고 | `letmeup.co.kr/logo.svg` |
+| 아이콘 4종 | `letmeup.co.kr/_next/static/media/icon_img{1~4}.svg` |
+| 관리자/사용자 UI 4종 | letmeup.co.kr 메인 영상 프레임 추출 |
 
 ---
 
-## KSNET PG 연동
-
-연동에 필요한 값은 환경변수로 주입합니다. **값이 비어 있으면 자동으로 모의(mock)
-결제 모드**로 동작하므로, 키 없이도 전체 구매 플로우를 시연·개발할 수 있습니다.
-
-```
-NEXT_PUBLIC_BASE_URL   사이트 base URL (콜백 리턴 URL 구성)
-KSNET_MID              가맹점 ID
-KSNET_MERCHANT_KEY     가맹점 라이선스/서명 키
-KSNET_API_BASE         승인 API 베이스 URL
-KSNET_PAY_URL          결제창 호출 URL
-```
-
-연동 코드는 `lib/ksnet.ts` 한 곳에 모여 있습니다. KSNET 계약 상품(KSPAY 표준결제 등)의
-연동 매뉴얼을 받으면 다음 `TODO` 지점만 실제 규격에 맞추면 됩니다.
-
-- `buildPaymentRequest()` — 결제창 POST 필드명/서명 규격
-- `approve()` — 승인 API 엔드포인트·요청/응답 파싱
-- `signRequest()` — 해시 대상 필드/순서/알고리즘
-- `app/api/payments/ksnet/callback/route.ts` — 콜백 파라미터명 파싱
-
----
-
-## 데이터 / 상태
-
-현재 쿠폰 카탈로그는 `lib/data.ts`의 시드 데이터이며, 주문은 `lib/store.ts`의
-인메모리 저장소(개발/데모용)에 보관됩니다. 운영 전환 시 `lib/store.ts`의 구현부만
-DB(DynamoDB / RDS / Supabase 등)로 교체하면 호출부 변경 없이 연결됩니다.
-
-> **참고**: 인메모리 저장소는 서버 재시작 시 초기화됩니다. 실제 운영에서는 반드시
-> 영속 저장소로 교체하세요.
-
----
-
-## 디렉터리 구조
-
-```
-app/
-  layout.tsx, page.tsx          # 레이아웃 + 홈
-  coupons/                      # 목록 / 상세
-  cart/  checkout/  sell/       # 장바구니 / 결제 / 입점
-  api/                          # orders, coupons, payments/ksnet
-components/                     # Header, Footer, CouponCard, CartContext, AddToCart
-lib/                           # types, data(시드), store(주문), ksnet(PG), format
-public/legacy/                 # 기존 키오스크 랜딩페이지(정적) 보존
-```
-
----
-
-_쿠폰 판매 사이트로 개편 · Next.js 풀스택 · KSNET PG 연동 골격 포함_
+_최종 업데이트: 2026-05-23 · 작성: Claude (claude.ai) · 다음 작업: 코워크 / Claude Code_
