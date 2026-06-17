@@ -246,6 +246,43 @@ img { max-width: 100%; display: block; }
   .device { grid-template-columns: 1fr; gap: 28px; }
 }
 
+/* ===== MADE BY US (직접 개발 · 실제성) ===== */
+.made { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 52px; align-items: center; }
+.made-photo { position: relative; border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-3); }
+.made-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.4s cubic-bezier(.22,1,.36,1); }
+.made-photo:hover img { transform: scale(1.05); }
+.made-tag {
+  position: absolute; left: 18px; bottom: 18px;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(14,17,22,0.78); color: #fff; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: 999px;
+}
+.made-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 0 rgba(19,196,211,0.6); animation: pingDot 2s ease-out infinite; }
+.made-body h2 { font-size: clamp(26px, 3.6vw, 40px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.2; margin-bottom: 16px; }
+.made-body h2 .hl { color: var(--brand-dark); }
+.made-body p { color: var(--ink-3); font-size: 16px; line-height: 1.75; margin-bottom: 24px; }
+.made-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.made-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--brand-soft); color: var(--brand-dark);
+  font-size: 14px; font-weight: 700; padding: 10px 16px; border-radius: 999px;
+}
+.made-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+@media (max-width: 900px) { .made { grid-template-columns: 1fr; gap: 26px; } }
+
+/* ===== ANIMATION POLISH ===== */
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes pingDot { 0% { box-shadow: 0 0 0 0 rgba(19,196,211,0.55); } 70%, 100% { box-shadow: 0 0 0 9px rgba(19,196,211,0); } }
+.device-photo img { animation: floaty 6.5s ease-in-out infinite; }
+.device-price-item { transition: transform .25s ease, box-shadow .25s ease; }
+.device-price-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+.device-feat-ico { transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+.device-feat:hover .device-feat-ico { transform: translateY(-3px) rotate(-6deg) scale(1.08); }
+@media (prefers-reduced-motion: reduce) {
+  .device-photo img { animation: none; }
+  .made-tag .dot { animation: none; }
+}
+
 /* ===== NO HIDDEN FEE LIST ===== */
 .nofee { max-width: 760px; margin: 0 auto; }
 .nofee-item {
@@ -425,7 +462,7 @@ img { max-width: 100%; display: block; }
         <img src="/assets/kiosk-tablet-mockup.png" alt="렛미업 태블릿 키오스크 실제 화면 — 입장·퇴장, 이용권 구매, 얼굴 정보 등록·이용">
         <span class="device-cap">📱 기존 키오스크 기능 100% 구현</span>
       </div>
-      <div class="device-info reveal">
+      <div class="device-info stagger">
         <div class="device-feat">
           <div class="device-feat-ico"><img src="/assets/icon-face.svg" alt=""></div>
           <div>
@@ -559,6 +596,28 @@ img { max-width: 100%; display: block; }
       <div class="nofee-item">
         <div class="nofee-check">✓</div>
         <div><strong>사소한 변경에도 출장·기능비</strong><p>운영 중 설정 변경은 원격으로 빠르게 지원해요.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MADE BY US (직접 개발 · 실제성) ===== -->
+<section class="section soft" id="made">
+  <div class="container">
+    <div class="made">
+      <div class="made-photo reveal">
+        <img src="/assets/team-wide.png" alt="렛미업 자체 개발팀이 스터디카페 키오스크 소프트웨어를 직접 개발하는 모습">
+        <span class="made-tag"><span class="dot"></span>렛미업 자체 개발팀</span>
+      </div>
+      <div class="made-body reveal">
+        <span class="section-tag">왜 추가비가 없을까</span>
+        <h2>직접 만드는 회사라,<br><span class="hl">업데이트가 무료입니다</span></h2>
+        <p>렛미업 키오스크 소프트웨어는 외주가 아니라 <strong style="color:var(--ink);font-weight:800;">자체 개발팀이 직접</strong> 만듭니다. 그래서 새 기능·개선이 나와도 받을 때마다 결제하지 않아요. 만든 사람이 바로 옆에 있으니, 사장님 요청도 빠르게 반영됩니다.</p>
+        <div class="made-chips">
+          <span class="made-chip"><span class="dot"></span>자체 개발팀</span>
+          <span class="made-chip"><span class="dot"></span>정기 무료 업데이트</span>
+          <span class="made-chip"><span class="dot"></span>원격 즉시 지원</span>
+        </div>
       </div>
     </div>
   </div>

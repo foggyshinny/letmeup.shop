@@ -849,6 +849,21 @@ img { max-width: 100%; display: block; }
 .reveal-pop.is-visible { opacity: 1; transform: scale(1); }
 .reveal-blur { opacity: 0; filter: blur(8px); transform: translateY(16px); transition: opacity .9s ease, filter .9s ease, transform .9s ease; }
 .reveal-blur.is-visible { opacity: 1; filter: blur(0); transform: translateY(0); }
+/* ===== REAL TEAM PHOTOS (실제성) ===== */
+.team-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 980px; margin: 0 auto; }
+.team-photo { margin: 0; border-radius: var(--radius-l); overflow: hidden; box-shadow: var(--shadow-2); position: relative; }
+.team-photo.wide { grid-column: 1 / -1; }
+.team-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.3s cubic-bezier(.22,1,.36,1); }
+.team-photo:hover img { transform: scale(1.05); }
+.team-photo .cap {
+  position: absolute; left: 14px; bottom: 14px;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(14,17,22,0.72); color: #fff; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  font-size: 12.5px; font-weight: 700; padding: 8px 13px; border-radius: 999px;
+}
+.team-photo .cap .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+@media (max-width: 700px) { .team-photos { grid-template-columns: 1fr; } }
+
 /* 자식 요소 순차 등장 (각 .reveal-stagger > * 가 시차 두고 등장) */
 .reveal-stagger > * { opacity: 0; transform: translateY(20px); transition: opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1); }
 .reveal-stagger.is-visible > * { opacity: 1; transform: translateY(0); }
@@ -1978,6 +1993,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p><span class="kw">샘랩 자체 개발팀</span>이 매달 기능을 업데이트합니다. 사장님 요청이 <span class="kw">다음 달 업데이트에 반영</span>되고, 추가 비용 없이 그대로 사용할 수 있습니다.</p>
         <span class="pillar-tag">자체 개발팀 · 정기 무료 업데이트</span>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== REAL TEAM PHOTOS (실제성) ===== -->
+<section class="section team-band">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="section-tag">Made in Letmeup</span>
+      <h2 class="section-title">화면 뒤에는<br>직접 만드는 사람들이 있습니다</h2>
+      <p class="section-sub">렛미업 키오스크는 외주가 아니라 <span class="kw-brand">샘랩 자체 개발팀</span>이 직접 만들고, 매장에 연결합니다.</p>
+    </div>
+    <div class="team-photos reveal-stagger">
+      <figure class="team-photo wide">
+        <img src="/assets/team-wide.png" alt="렛미업 자체 개발팀이 스터디카페 키오스크 소프트웨어를 함께 개발하는 모습" loading="lazy">
+        <span class="cap"><span class="dot"></span>렛미업 자체 개발팀</span>
+      </figure>
+      <figure class="team-photo">
+        <img src="/assets/team-dev.png" alt="개발자가 렛미업 키오스크 시스템을 개발하는 모습" loading="lazy">
+      </figure>
+      <figure class="team-photo">
+        <img src="/assets/team-pair.png" alt="기능 개선을 함께 논의하는 렛미업 팀" loading="lazy">
+      </figure>
     </div>
   </div>
 </section>
