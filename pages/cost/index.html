@@ -209,6 +209,43 @@ img { max-width: 100%; display: block; }
   background: rgba(91,185,72,0.12); padding: 5px 12px; border-radius: 999px;
 }
 
+/* ===== DEVICE SHOWCASE (태블릿 키오스크) ===== */
+.device { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.device-photo {
+  background: linear-gradient(160deg, var(--brand-soft), #ffffff);
+  border: 1px solid var(--line); border-radius: var(--radius-xl);
+  padding: 24px; box-shadow: var(--shadow-2);
+}
+.device-photo img { width: 100%; height: auto; border-radius: var(--radius-m); }
+.device-cap {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: 16px;
+  font-size: 13px; font-weight: 700; color: var(--brand-dark);
+  background: rgba(19,196,211,0.10); padding: 7px 14px; border-radius: 999px;
+}
+.device-info { display: flex; flex-direction: column; gap: 18px; }
+.device-feat { display: flex; gap: 14px; align-items: flex-start; }
+.device-feat-ico {
+  flex: none; width: 46px; height: 46px; border-radius: 13px;
+  background: var(--brand-soft); display: flex; align-items: center; justify-content: center;
+}
+.device-feat-ico img { width: 24px; height: 24px; }
+.device-feat strong { font-weight: 800; font-size: 17px; letter-spacing: -0.02em; display: block; }
+.device-feat p { color: var(--ink-3); font-size: 15px; margin-top: 2px; }
+.device-price { display: flex; gap: 14px; margin-top: 6px; padding-top: 22px; border-top: 1px dashed var(--line); }
+.device-price-item {
+  flex: 1; background: white; border: 1px solid var(--line);
+  border-radius: var(--radius-m); padding: 16px 18px; box-shadow: var(--shadow-1);
+}
+.device-price-item span {
+  display: block; font-size: 12px; font-weight: 800; color: var(--ink-4);
+  letter-spacing: .04em; text-transform: uppercase; margin-bottom: 4px; font-family: var(--font-display);
+}
+.device-price-item strong { font-size: 24px; font-weight: 900; letter-spacing: -0.03em; color: var(--brand-deep); }
+.device-price-note { font-size: 13px; color: var(--ink-4); margin-top: 10px; }
+@media (max-width: 900px) {
+  .device { grid-template-columns: 1fr; gap: 28px; }
+}
+
 /* ===== NO HIDDEN FEE LIST ===== */
 .nofee { max-width: 760px; margin: 0 auto; }
 .nofee-item {
@@ -371,6 +408,51 @@ img { max-width: 100%; display: block; }
     <div class="hero-cta">
       <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="btn btn-primary cta-pulse" data-cta="hero_inquiry">문의하기 <span class="btn-arrow">→</span></a>
       <a href="#cost" class="btn btn-secondary">비용 구조 보기</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DEVICE SHOWCASE: 태블릿 키오스크 ===== -->
+<section class="section soft" id="device">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-tag">렛미업 태블릿 키오스크</span>
+      <h2 class="section-title">이런 키오스크를<br>드립니다</h2>
+      <p class="section-sub">화면부터 입·퇴실까지, 실제 매장에서 쓰는 그대로입니다.</p>
+    </div>
+    <div class="device">
+      <div class="device-photo reveal">
+        <img src="/assets/kiosk-tablet-mockup.png" alt="렛미업 태블릿 키오스크 실제 화면 — 입장·퇴장, 이용권 구매, 얼굴 정보 등록·이용">
+        <span class="device-cap">📱 기존 키오스크 기능 100% 구현</span>
+      </div>
+      <div class="device-info reveal">
+        <div class="device-feat">
+          <div class="device-feat-ico"><img src="/assets/icon-face.svg" alt=""></div>
+          <div>
+            <strong>얼굴 인식 입장으로 더 빠르게</strong>
+            <p>로그인 정보 입력 없이, 얼굴 한 번 등록하면 바로 입장.</p>
+          </div>
+        </div>
+        <div class="device-feat">
+          <div class="device-feat-ico"><img src="/assets/icon-kiosk.svg" alt=""></div>
+          <div>
+            <strong>QR · 지문으로 1초 입·퇴실</strong>
+            <p>태블릿 메인 화면에서 빠르게 입출입. 줄 서지 않아요.</p>
+          </div>
+        </div>
+        <div class="device-feat">
+          <div class="device-feat-ico"><img src="/assets/icon-ticket.svg" alt=""></div>
+          <div>
+            <strong>3단계로 끝나는 이용권 구매</strong>
+            <p>누구나 쉽게. 신용카드·간편결제·지역화폐까지 지원.</p>
+          </div>
+        </div>
+        <div class="device-price">
+          <div class="device-price-item"><span>초기 비용</span><strong>50만원</strong></div>
+          <div class="device-price-item"><span>월 이용료</span><strong>25,000원</strong></div>
+        </div>
+        <p class="device-price-note">※ 결제 수수료는 매장 구성에 따라 안내드립니다. 자세한 견적은 문의 주세요.</p>
+      </div>
     </div>
   </div>
 </section>
