@@ -10,6 +10,7 @@ import {
 } from "@/lib/ksnet";
 import type { ApprovalResult } from "@/lib/ksnet";
 import { issueCouponsForOrder, sendCouponSms } from "@/lib/fulfill";
+import { decrementStockForOrder } from "@/lib/inventory";
 import type { PayMethod } from "@/lib/types";
 
 /**
@@ -43,7 +44,8 @@ export async function POST(req: Request) {
       await updateOrder(order.id, { status: "failed" });
       return NextResponse.json({ mode: "settled", approved: false, message: result.message });
     }
-    // 결제 성공 → 쿠폰 코드 자동 발급 + 문자(비즈뿌리오) 발송
+    // 결제 성공 → 재고 차감 + 쿠폰 코드 자동 발급 + 문자(비즈뿌리오) 발송
+    await decrementStockForOrder(order);
     const issued = issueCouponsForOrder(order);
     const smsSent = await sendCouponSms(order, issued);
     await updateOrder(order.id, {

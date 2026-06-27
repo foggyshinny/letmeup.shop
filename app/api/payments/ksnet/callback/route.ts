@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getOrder, updateOrder } from "@/lib/store";
 import { approve, getKsnetConfig } from "@/lib/ksnet";
 import { issueCouponsForOrder, sendCouponSms } from "@/lib/fulfill";
+import { decrementStockForOrder } from "@/lib/inventory";
 
 /**
  * KSNET 결제창 콜백(리턴) 처리.
@@ -33,7 +34,8 @@ async function handle(params: Record<string, string>) {
   // 최종 승인요청
   const result = await approve(order, params);
   if (result.success) {
-    // 쿠폰 코드 자동 발급 + 문자(비즈뿌리오) 발송
+    // 재고 차감 + 쿠폰 코드 자동 발급 + 문자(비즈뿌리오) 발송
+    await decrementStockForOrder(order);
     const issued = issueCouponsForOrder(order);
     const smsSent = await sendCouponSms(order, issued);
     await updateOrder(order.id, {
