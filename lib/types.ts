@@ -56,6 +56,8 @@ export interface OrderItem {
   brand: string;
   unitPrice: number;
   qty: number;
+  /** 판매자(파트너) ID. 시드/플랫폼 직접 상품은 비어 있음. 정산 집계용 */
+  sellerId?: string;
 }
 
 /** 결제 수단 종류 */
@@ -204,4 +206,35 @@ export interface Order {
     method?: PayMethod | string;
     approvedAt?: string;
   };
+}
+
+/** 정산 처리 상태 */
+export type SettlementStatus =
+  | "paid" // 이체 완료
+  | "failed"; // 이체 실패 (재시도 가능)
+
+/** 판매자 정산(이체) 레코드 */
+export interface Settlement {
+  id: string;
+  sellerId: string;
+  /** 정산 시점의 판매자 상호 스냅샷 */
+  sellerName: string;
+  /** 정산에 포함된 결제완료 주문 ID들 */
+  orderIds: string[];
+  /** 판매액(수수료 차감 전) */
+  gross: number;
+  /** 적용 수수료율 (0~1) */
+  commissionRate: number;
+  /** 수수료액 */
+  fee: number;
+  /** 실 정산액 = gross - fee */
+  net: number;
+  status: SettlementStatus;
+  /** 정산 시점의 정산 계좌 스냅샷 */
+  account?: SettlementAccount;
+  /** 이체 어댑터 거래 참조 */
+  transferRef?: string;
+  /** 실패 사유 */
+  failReason?: string;
+  createdAt: string;
 }

@@ -59,6 +59,9 @@ export default async function AdminDashboard() {
               </span>
             )}
           </Link>
+          <Link href="/admin/settlements" className="btn-ghost">
+            정산 관리
+          </Link>
           <AdminLogoutButton />
         </div>
       </div>

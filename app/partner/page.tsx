@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentSeller } from "@/lib/seller";
-import { listProductsBySeller, listAllOrders } from "@/lib/store";
+import {
+  listProductsBySeller,
+  listAllOrders,
+  listSettlementsBySeller,
+} from "@/lib/store";
+import { computeUnsettled } from "@/lib/settlement";
 import { won } from "@/lib/format";
 import PartnerLogoutButton from "@/components/PartnerLogoutButton";
 import PartnerProductActions from "@/components/PartnerProductActions";
@@ -19,23 +24,27 @@ export default async function PartnerDashboard() {
   if (!seller) redirect("/partner/login?next=/partner");
 
   const products = await listProductsBySeller(seller.id);
-  const productIds = new Set(products.map((p) => p.id));
 
-  // 내 상품이 포함된 결제완료 주문에서 매출/정산 집계 (데모: 전체 주문 스캔)
+  // 내 상품이 포함된 결제완료 주문에서 매출 집계 (주문 항목의 sellerId 기준)
   const allOrders = await listAllOrders();
   let gross = 0;
   let soldCount = 0;
   for (const o of allOrders) {
     if (o.status !== "paid") continue;
     for (const it of o.items) {
-      if (productIds.has(it.couponId)) {
+      if (it.sellerId === seller.id) {
         gross += it.unitPrice * it.qty;
         soldCount += it.qty;
       }
     }
   }
-  const fee = Math.round(gross * seller.commissionRate);
-  const settlement = gross - fee;
+
+  // 정산: 미정산(예정) vs 정산 완료
+  const unsettled = await computeUnsettled(seller);
+  const settlements = await listSettlementsBySeller(seller.id);
+  const settledNet = settlements
+    .filter((s) => s.status === "paid")
+    .reduce((sum, s) => sum + s.net, 0);
 
   const badge = STATUS_BADGE[seller.status] ?? STATUS_BADGE.pending;
   const approved = seller.status === "approved";
@@ -43,8 +52,8 @@ export default async function PartnerDashboard() {
   const stats = [
     { label: "총 판매액", value: won(gross) },
     { label: "판매 건수", value: `${soldCount}건` },
-    { label: `수수료 (${Math.round(seller.commissionRate * 100)}%)`, value: won(fee) },
-    { label: "정산 예정액", value: won(settlement) },
+    { label: "정산 예정액", value: won(unsettled.net) },
+    { label: "정산 완료", value: won(settledNet) },
   ];
 
   return (
@@ -155,17 +164,69 @@ export default async function PartnerDashboard() {
       <h2 className="mt-10 text-lg font-extrabold">정산 정보</h2>
       <div className="mt-3 rounded-2xl bg-white p-5 shadow-card ring-1 ring-slate-100 text-sm">
         {seller.settlement ? (
-          <div className="text-ink-muted">
-            {seller.settlement.bank} {seller.settlement.account} ({seller.settlement.holder})
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-ink-muted">
+              {seller.settlement.bank} {seller.settlement.account} ({seller.settlement.holder})
+            </span>
+            <Link href="/partner/settings" className="font-semibold text-brand">
+              변경
+            </Link>
           </div>
         ) : (
           <div className="text-ink-muted">
-            정산 계좌가 등록되지 않았습니다.{" "}
+            정산 계좌가 등록되지 않았습니다. 정산을 받으려면 계좌를 먼저 등록해 주세요.{" "}
             <Link href="/partner/settings" className="font-semibold text-brand">
               계좌 등록하기
             </Link>
           </div>
         )}
+      </div>
+
+      {/* 정산 내역 */}
+      <h2 className="mt-10 text-lg font-extrabold">정산 내역</h2>
+      <div className="mt-3 overflow-x-auto rounded-2xl bg-white shadow-card ring-1 ring-slate-100">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-slate-100 text-ink-muted">
+            <tr>
+              <th className="p-3 font-semibold">정산번호</th>
+              <th className="p-3 font-semibold">정산액</th>
+              <th className="p-3 font-semibold">주문수</th>
+              <th className="p-3 font-semibold">상태</th>
+              <th className="p-3 font-semibold">일시</th>
+            </tr>
+          </thead>
+          <tbody>
+            {settlements.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-ink-muted">
+                  아직 정산 내역이 없습니다. 정산은 관리자가 주기적으로 실행합니다.
+                </td>
+              </tr>
+            ) : (
+              settlements.map((s) => (
+                <tr key={s.id} className="border-b border-slate-50">
+                  <td className="p-3 font-mono text-xs">{s.id}</td>
+                  <td className="p-3 font-semibold">{won(s.net)}</td>
+                  <td className="p-3">{s.orderIds.length}건</td>
+                  <td className="p-3">
+                    <span
+                      className={`chip ${
+                        s.status === "paid"
+                          ? "bg-brand-light text-brand"
+                          : "bg-red-50 text-red-600"
+                      }`}
+                    >
+                      {s.status === "paid" ? "정산완료" : "실패"}
+                    </span>
+                  </td>
+                  <td className="p-3 text-xs text-ink-muted">
+                    {new Date(s.createdAt).toLocaleString("ko-KR")}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

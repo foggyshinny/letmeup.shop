@@ -4,6 +4,7 @@ import type {
   Order,
   SavedPaymentMethod,
   Seller,
+  Settlement,
   User,
 } from "./types";
 
@@ -47,6 +48,10 @@ export interface StoreBackend {
   deleteProduct(id: string): Promise<boolean>;
   listProductsBySeller(sellerId: string): Promise<Coupon[]>;
   listAllProducts(): Promise<Coupon[]>;
+  // ── 정산 ──
+  saveSettlement(settlement: Settlement): Promise<Settlement>;
+  listSettlementsBySeller(sellerId: string): Promise<Settlement[]>;
+  listAllSettlements(): Promise<Settlement[]>;
 }
 
 // ── 인메모리 백엔드 ──────────────────────────────────────────────────────────
@@ -60,6 +65,7 @@ const g = globalThis as unknown as {
   __letmeupSellers?: Map<string, Seller>;
   __letmeupSellersByEmail?: Map<string, string>;
   __letmeupProducts?: Map<string, Coupon>;
+  __letmeupSettlements?: Map<string, Settlement>;
 };
 const orders: Map<string, Order> = (g.__letmeupOrders ??= new Map());
 const users: Map<string, User> = (g.__letmeupUsers ??= new Map());
@@ -69,6 +75,7 @@ const locations: Map<string, LocationRecord> = (g.__letmeupLocations ??= new Map
 const sellers: Map<string, Seller> = (g.__letmeupSellers ??= new Map());
 const sellersByEmail: Map<string, string> = (g.__letmeupSellersByEmail ??= new Map());
 const products: Map<string, Coupon> = (g.__letmeupProducts ??= new Map());
+const settlements: Map<string, Settlement> = (g.__letmeupSettlements ??= new Map());
 
 const memStore: StoreBackend = {
   async saveOrder(order) {
@@ -194,6 +201,19 @@ const memStore: StoreBackend = {
       (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
     );
   },
+  // ── 정산 ──
+  async saveSettlement(settlement) {
+    settlements.set(settlement.id, settlement);
+    return settlement;
+  },
+  async listSettlementsBySeller(sellerId) {
+    return [...settlements.values()]
+      .filter((s) => s.sellerId === sellerId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+  async listAllSettlements() {
+    return [...settlements.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
 };
 
 // ── 백엔드 선택 ──────────────────────────────────────────────────────────────
@@ -290,6 +310,16 @@ export async function listProductsBySeller(sellerId: string) {
 }
 export async function listAllProducts() {
   return (await backend()).listAllProducts();
+}
+// ── 정산 ──
+export async function saveSettlement(settlement: Settlement) {
+  return (await backend()).saveSettlement(settlement);
+}
+export async function listSettlementsBySeller(sellerId: string) {
+  return (await backend()).listSettlementsBySeller(sellerId);
+}
+export async function listAllSettlements() {
+  return (await backend()).listAllSettlements();
 }
 
 // ── ID 생성 (순수 함수, 동기) ────────────────────────────────────────────────

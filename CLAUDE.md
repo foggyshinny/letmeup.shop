@@ -49,6 +49,7 @@ app/
     settings/                   #   담당자 정보·정산 계좌
   admin/ admin/login/           # 관리자 대시보드 + Authy 로그인
   admin/sellers/                #   판매자 승인·정지 관리
+  admin/settlements/            #   판매자 정산(이체) 실행·내역
   api/
     auth/        signup·login·logout·me
     partner/     signup·login·logout·me·settings·products[/id]
@@ -57,19 +58,22 @@ app/
     payment-methods/ [id]/
     location/
     payments/ksnet/ ready·callback
-    admin/       login·logout·setup·sellers/[id](승인/정지)
+    admin/       login·logout·setup·sellers/[id](승인/정지)·settlements(정산실행)
 components/                     # Header, Footer, CartContext, AuthContext,
                                 # CouponCard, AddToCart, PayMethodSelector,
                                 # NearbyStores, AdminLogoutButton,
                                 # Partner*(ProductForm/ProductActions/SettingsForm/LogoutButton),
-                                # AdminSellerActions
+                                # AdminSellerActions, AdminSettlementAction
 lib/
   types.ts     도메인 타입(단일 출처) — Coupon/User/Order/Seller 등
   data.ts      쿠폰/카테고리 시드 데이터(플랫폼 직접 상품)
   catalog.ts   ★ 시드 + 판매자 상품 병합 카탈로그 (서버 전용, async)
   product.ts   판매자 상품 입력 검증/정규화 + 썸네일 옵션
+  inventory.ts 결제 성공 시 재고 차감
+  settlement.ts 판매자 미정산 매출 집계 + 정산 실행
+  payout.ts    정산 이체 어댑터 (설정 없으면 mock)
   places.ts    매장 위치 시드 + 거리(하버사인)
-  store.ts     ★ 저장소 공개 API (orders/users/paymentMethods/locations/sellers/products)
+  store.ts     ★ 저장소 공개 API (orders/users/paymentMethods/locations/sellers/products/settlements)
   format.ts    won(), classNames()
   device.ts    getDeviceId() / getOwnerId()
   auth.ts      회원 비번 해시(scrypt)·세션(HMAC)
@@ -119,6 +123,9 @@ DynamoDB는 **단일 테이블 + GSI("gsi1")** 구조다. 키 설계는 `lib/dyn
 - 주문 금액은 항상 서버에서 `catalog.findCoupon`으로 **재계산**(클라이언트 값 불신).
 - 정산: 판매자 대시보드가 결제완료 주문에서 자기 상품 매출을 집계하고
   수수료율(`commissionRate`, 기본 10%)을 적용해 정산 예정액을 보여준다.
+  관리자가 `/admin/settlements`에서 판매자별 미정산 매출을 **정산 실행**하면
+  `lib/payout.ts`(설정 없으면 mock)로 이체하고 `Settlement` 레코드를 남긴다.
+  이미 정산된 주문은 재정산에서 제외된다(주문 항목의 `sellerId`로 집계).
 
 ## 외부 연동 & 환경변수
 
@@ -163,8 +170,11 @@ DynamoDB는 **단일 테이블 + GSI("gsi1")** 구조다. 키 설계는 `lib/dyn
 2. KSNET/비즈뿌리오/Authy 실연동값 주입 및 규격 매핑
 3. 쿠폰 **사용처리(코드 검증/차감) API**
 4. 환불/주문취소
-5. ~~판매자 상품 등록·관리~~ ✅ 파트너 센터(`/partner/*`)에서 판매자가 직접 등록·수정.
-   남은 것: 결제 성공 시 **재고 차감**(현재 시드/판매자 상품 모두 미차감), 판매자별 **정산 실행/이체** 연동.
+5. ~~판매자 상품 등록·관리 / 재고 차감 / 정산 실행~~ ✅
+   파트너 센터(`/partner/*`)에서 판매자가 직접 등록·수정. 결제 성공 시 재고 차감
+   (`lib/inventory.ts`). 관리자 정산 관리(`/admin/settlements`)에서 판매자별
+   미정산 매출을 집계해 이체(`lib/payout.ts`, 설정 없으면 mock) 실행 → 정산 레코드 저장.
+   남은 것: 정산 주기 자동화(스케줄러), 실 지급대행 API 규격 매핑.
 6. 회원 비밀번호 재설정
 7. 사업자 정보(푸터의 `○○○`) 실제 값 반영
 8. 관리자 통계 Scan → GSI/집계로 개선 (대량 데이터 시). 판매자 매출 집계도 현재 전체 주문 Scan.

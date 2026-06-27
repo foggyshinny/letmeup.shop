@@ -57,6 +57,7 @@ export async function POST(req: Request) {
       brand: coupon.brand,
       unitPrice: coupon.price,
       qty,
+      sellerId: coupon.sellerId,
     });
   }
 

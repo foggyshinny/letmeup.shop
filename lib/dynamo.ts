@@ -14,6 +14,7 @@ import type {
   Order,
   SavedPaymentMethod,
   Seller,
+  Settlement,
   User,
 } from "./types";
 
@@ -37,6 +38,7 @@ import type {
  *   위치      pk=LOC#<owner> sk=LOC
  *   판매자    pk=SELLER#<id> sk=SELLER  gsi1pk=SELLEREMAIL#<email> gsi1sk=SELLER
  *   상품      pk=PRODUCT#<id> sk=PRODUCT gsi1pk=SELLER#<sellerId>  gsi1sk=<createdAt>
+ *   정산      pk=SETTLE#<id>  sk=SETTLE  gsi1pk=SELLERSETTLE#<sellerId> gsi1sk=<createdAt>
  *   (도메인 객체는 data 속성에 통째로 보관)
  */
 
@@ -336,6 +338,46 @@ export function createDynamoStore(): StoreBackend {
         (r.Items as Item<Coupon>[] | undefined)
           ?.map((i) => i.data)
           .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")) ?? []
+      );
+    },
+
+    // ── 정산 ──
+    async saveSettlement(settlement: Settlement) {
+      await put({
+        pk: `SETTLE#${settlement.id}`,
+        sk: "SETTLE",
+        gsi1pk: `SELLERSETTLE#${settlement.sellerId}`,
+        gsi1sk: settlement.createdAt,
+        type: "settlement",
+        data: settlement,
+      });
+      return settlement;
+    },
+    async listSettlementsBySeller(sellerId: string) {
+      const r = await doc.send(
+        new QueryCommand({
+          TableName: table,
+          IndexName: "gsi1",
+          KeyConditionExpression: "gsi1pk = :p",
+          ExpressionAttributeValues: { ":p": `SELLERSETTLE#${sellerId}` },
+          ScanIndexForward: false,
+        }),
+      );
+      return (r.Items as Item<Settlement>[] | undefined)?.map((i) => i.data) ?? [];
+    },
+    async listAllSettlements() {
+      const r = await doc.send(
+        new ScanCommand({
+          TableName: table,
+          FilterExpression: "#t = :t",
+          ExpressionAttributeNames: { "#t": "type" },
+          ExpressionAttributeValues: { ":t": "settlement" },
+        }),
+      );
+      return (
+        (r.Items as Item<Settlement>[] | undefined)
+          ?.map((i) => i.data)
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt)) ?? []
       );
     },
   };
