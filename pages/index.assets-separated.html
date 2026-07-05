@@ -1534,6 +1534,208 @@ img { max-width: 100%; display: block; }
   50% { transform: translate(0,0) scale(1.05); }
 }
 
+/* ===== 팝업 배너 모달 ===== */
+.pb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(14, 17, 22, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.pb-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+.pb-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+  transform: translateY(16px) scale(0.97);
+  opacity: 0;
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.34s ease;
+}
+.pb-overlay.open .pb-card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.pb-visual {
+  position: relative;
+  padding: 34px 28px 30px;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+}
+.pb-visual::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 160px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+}
+.pb-eyebrow {
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  padding: 5px 12px;
+  margin-bottom: 14px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.pb-title {
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+.pb-title .pb-hl {
+  color: var(--accent-soft);
+  background: linear-gradient(transparent 62%, rgba(245, 160, 91, 0.55) 62%);
+  padding: 0 2px;
+}
+.pb-body {
+  padding: 24px 28px 22px;
+  text-align: center;
+}
+.pb-desc {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-3);
+  margin-bottom: 20px;
+}
+.pb-desc strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.pb-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 52px;
+  border-radius: var(--radius-s);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.pb-btn-primary {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(19, 196, 211, 0.32);
+}
+.pb-btn-primary:hover {
+  background: var(--brand-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(19, 196, 211, 0.4);
+}
+.pb-btn-secondary {
+  background: var(--bg-soft);
+  color: var(--ink-2);
+  border: 1px solid var(--line-2);
+}
+.pb-btn-secondary:hover {
+  background: #eef0f3;
+}
+.pb-btn .pb-arrow {
+  transition: transform 0.18s ease;
+}
+.pb-btn:hover .pb-arrow {
+  transform: translateX(3px);
+}
+.pb-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+.pb-close:hover {
+  background: rgba(255, 255, 255, 0.36);
+}
+.pb-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-soft);
+}
+.pb-dismiss {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+.pb-dismiss:hover { color: var(--ink-3); }
+.pb-dismiss input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+.pb-footer-close {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+.pb-footer-close:hover { color: var(--ink); }
+@media (max-width: 480px) {
+  .pb-title { font-size: 21px; }
+  .pb-visual { padding: 30px 22px 26px; }
+  .pb-body { padding: 20px 22px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pb-overlay, .pb-card, .pb-btn, .pb-arrow { transition: none; }
+}
 
 </style>
 </head>
@@ -2409,6 +2611,98 @@ document.addEventListener('DOMContentLoaded', function(){
     </a>
   </div>
 </div>
+
+<!-- ===== 팝업 배너 모달 =====
+     문구·링크만 아래에서 직접 수정하면 됩니다.
+     - 노출 지연: data-delay(ms)  ·  "오늘 하루 보지 않기" 저장 기간: data-hide-days -->
+<div class="pb-overlay" id="promoBanner" role="dialog" aria-modal="true" aria-labelledby="pbTitle" aria-hidden="true" data-delay="1200" data-hide-days="1">
+  <div class="pb-card">
+    <button class="pb-close" type="button" aria-label="닫기" data-pb-close>&times;</button>
+    <div class="pb-visual">
+      <span class="pb-eyebrow">LETMEUP</span>
+      <p class="pb-title" id="pbTitle">지금 쓰는 키오스크,<br><span class="pb-hl">도입비 0원</span>으로 바꾸세요</p>
+    </div>
+    <div class="pb-body">
+      <p class="pb-desc">
+        도입비·결제 수수료·업데이트까지 —<br>
+        <strong>사장님이 매달 손해 보던 것만</strong> 다시 설계했습니다.
+      </p>
+      <div class="pb-actions">
+        <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="pb-btn pb-btn-primary" data-cta="banner_consult">
+          무료 상담 받기 <span class="pb-arrow">→</span>
+        </a>
+        <a href="https://guide.letmeup.shop/experience" target="_blank" rel="noopener" class="pb-btn pb-btn-secondary" data-cta="banner_experience">
+          🖐️ 직접 체험해보기
+        </a>
+      </div>
+    </div>
+    <div class="pb-footer">
+      <label class="pb-dismiss">
+        <input type="checkbox" data-pb-dismiss> 오늘 하루 보지 않기
+      </label>
+      <button class="pb-footer-close" type="button" data-pb-close>닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 팝업 배너 모달 제어 =====
+(function(){
+  var overlay = document.getElementById('promoBanner');
+  if (!overlay) return;
+
+  var STORE_KEY = 'letmeup_banner_hidden_until';
+  var delay = parseInt(overlay.getAttribute('data-delay') || '1000', 10);
+  var hideDays = parseInt(overlay.getAttribute('data-hide-days') || '1', 10);
+  var dismissEl = overlay.querySelector('[data-pb-dismiss]');
+  var lastFocused = null;
+
+  function isHidden(){
+    try {
+      var until = parseInt(window.localStorage.getItem(STORE_KEY) || '0', 10);
+      return until && Date.now() < until;
+    } catch (e) { return false; }
+  }
+  function remember(){
+    try {
+      var until = Date.now() + hideDays * 24 * 60 * 60 * 1000;
+      window.localStorage.setItem(STORE_KEY, String(until));
+    } catch (e) {}
+  }
+
+  function open(){
+    lastFocused = document.activeElement;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    var firstBtn = overlay.querySelector('.pb-btn-primary');
+    if (firstBtn) firstBtn.focus();
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'banner_view', banner_id: 'promo_kiosk' });
+  }
+  function close(){
+    if (dismissEl && dismissEl.checked) remember();
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  overlay.addEventListener('click', function(e){
+    if (e.target === overlay || e.target.closest('[data-pb-close]')) close();
+  });
+  overlay.querySelectorAll('.pb-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ if (dismissEl) dismissEl.checked = true; remember(); });
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+  });
+
+  if (!isHidden()) {
+    window.setTimeout(open, delay);
+  }
+})();
+</script>
 
 </body>
 </html>
