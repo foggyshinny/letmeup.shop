@@ -1534,6 +1534,441 @@ img { max-width: 100%; display: block; }
   50% { transform: translate(0,0) scale(1.05); }
 }
 
+/* ===== 팝업 배너 모달 ===== */
+.pb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(14, 17, 22, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.pb-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+.pb-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+  transform: translateY(16px) scale(0.97);
+  opacity: 0;
+  transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.34s ease;
+}
+.pb-overlay.open .pb-card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.pb-visual {
+  position: relative;
+  padding: 34px 28px 30px;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+}
+.pb-visual::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 160px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+}
+.pb-eyebrow {
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  padding: 5px 12px;
+  margin-bottom: 14px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.pb-title {
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+}
+.pb-title .pb-hl {
+  color: var(--accent-soft);
+  background: linear-gradient(transparent 62%, rgba(245, 160, 91, 0.55) 62%);
+  padding: 0 2px;
+}
+.pb-body {
+  padding: 24px 28px 22px;
+  text-align: center;
+}
+.pb-desc {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-3);
+  margin-bottom: 20px;
+}
+.pb-desc strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.pb-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 52px;
+  border-radius: var(--radius-s);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.pb-btn-primary {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(19, 196, 211, 0.32);
+}
+.pb-btn-primary:hover {
+  background: var(--brand-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(19, 196, 211, 0.4);
+}
+.pb-btn-secondary {
+  background: var(--bg-soft);
+  color: var(--ink-2);
+  border: 1px solid var(--line-2);
+}
+.pb-btn-secondary:hover {
+  background: #eef0f3;
+}
+.pb-btn .pb-arrow {
+  transition: transform 0.18s ease;
+}
+.pb-btn:hover .pb-arrow {
+  transform: translateX(3px);
+}
+.pb-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+.pb-close:hover {
+  background: rgba(255, 255, 255, 0.36);
+}
+.pb-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-soft);
+}
+.pb-dismiss {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+.pb-dismiss:hover { color: var(--ink-3); }
+.pb-dismiss input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+.pb-footer-close {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+.pb-footer-close:hover { color: var(--ink); }
+@media (max-width: 480px) {
+  .pb-title { font-size: 21px; }
+  .pb-visual { padding: 30px 22px 26px; }
+  .pb-body { padding: 20px 22px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pb-overlay, .pb-card, .pb-btn, .pb-arrow { transition: none; }
+}
+
+/* ===== 변경과정 4단계 섹션 ===== */
+.change { background: var(--bg-soft); }
+.chg-steps { max-width: 760px; margin: 0 auto; }
+.chg-step {
+  position: relative;
+  padding: 0 0 40px 76px;
+}
+.chg-step:last-child { padding-bottom: 0; }
+.chg-step::before {
+  content: "";
+  position: absolute;
+  left: 25px;
+  top: 10px;
+  bottom: -10px;
+  width: 2px;
+  background: var(--line-2);
+}
+.chg-step:last-child::before { display: none; }
+.chg-num {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  box-shadow: 0 6px 16px rgba(19, 196, 211, 0.32);
+  z-index: 1;
+}
+.chg-step h3 {
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 6px 0 6px;
+}
+.chg-step > p {
+  color: var(--ink-3);
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.chg-step > p strong { color: var(--ink); font-weight: 700; }
+.chg-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 46px;
+  padding: 0 22px;
+  border-radius: var(--radius-s);
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+.chg-action:hover {
+  background: var(--brand-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(19, 196, 211, 0.3);
+}
+.chg-action .chg-arrow { transition: transform 0.18s ease; }
+.chg-action:hover .chg-arrow { transform: translateX(3px); }
+.chg-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green);
+  background: #eaf7ee;
+  padding: 7px 15px;
+  border-radius: 999px;
+}
+/* 02단계 지문/입퇴실 분기 */
+.chg-branch {
+  margin-top: 4px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  padding: 18px 18px 20px;
+  box-shadow: var(--shadow-1);
+}
+.chg-branch-q {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+.chg-branch-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.chg-branch-tabs button {
+  flex: 1;
+  height: 46px;
+  border: 1.5px solid var(--line-2);
+  background: var(--bg);
+  border-radius: var(--radius-s);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+.chg-branch-tabs button:hover { border-color: var(--brand); }
+.chg-branch-tabs button.active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+}
+.chg-branch-body {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+.chg-branch-body[hidden] { display: none; }
+.chg-branch-body strong { color: var(--brand-dark); font-weight: 700; }
+.chg-branch-tag {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.chg-cta { text-align: center; margin-top: 44px; }
+.chg-cta a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 58px;
+  padding: 0 34px;
+  border-radius: var(--radius-m);
+  background: var(--brand);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(19, 196, 211, 0.34);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+.chg-cta a:hover { background: var(--brand-dark); transform: translateY(-2px); }
+@media (max-width: 560px) {
+  .chg-step { padding-left: 62px; }
+  .chg-num { width: 44px; height: 44px; font-size: 15px; }
+  .chg-step::before { left: 21px; }
+  .chg-branch-tabs { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chg-action, .chg-cta a, .chg-branch-tabs button { transition: none; }
+}
+
+/* ===== 고객센터 파트너십 섹션 ===== */
+.support { background: var(--bg); }
+.sup-assoc {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: block;
+  margin: 0 auto 22px;
+  background: #fff;
+  box-shadow: var(--shadow-2);
+}
+.sup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+.sup-card {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  padding: 34px 28px 30px;
+  text-align: center;
+  box-shadow: var(--shadow-1);
+}
+.sup-card.highlight {
+  border: 1.5px solid var(--brand);
+  background: var(--brand-soft);
+  box-shadow: var(--shadow-2);
+}
+.sup-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--brand);
+  padding: 4px 11px;
+  border-radius: 999px;
+}
+.sup-icon { font-size: 34px; line-height: 1; margin-bottom: 12px; }
+.sup-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-4);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+.sup-by {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+.sup-by .plus { color: var(--brand-dark); margin: 0 3px; }
+.sup-card p {
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--ink-3);
+}
+@media (max-width: 640px) {
+  .sup-grid { grid-template-columns: 1fr; }
+}
 
 </style>
 </head>
@@ -2214,6 +2649,106 @@ img { max-width: 100%; display: block; }
   </div>
 </section>
 
+<!-- ===== 고객센터 파트너십 (스터디카페 연합회) ===== -->
+<section class="section support" id="support">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">Customer Care</span>
+      <img src="assets/assoc-studycafe.png" alt="스터디카페 독서실 운영자 협회" class="sup-assoc reveal-pop">
+      <h2 class="section-title">렛미업 운영센터와 스터디카페 연합회가<br>더 좋은 <span class="kw-brand">고객응대</span>를 시작합니다</h2>
+      <p class="section-sub">기술은 렛미업이, 사용법·장애는 <span class="kw">협회와 함께 상시로</span> — 진짜 친근한 고객센터.</p>
+    </div>
+    <div class="sup-grid">
+      <div class="sup-card reveal">
+        <div class="sup-icon">🛠️</div>
+        <div class="sup-label">기술 문의</div>
+        <div class="sup-by">렛미업</div>
+        <p>키오스크·시스템 관련 기술 문의는 렛미업 운영센터가 직접 응대합니다.</p>
+      </div>
+      <div class="sup-card highlight reveal">
+        <span class="sup-badge">상시 대응</span>
+        <div class="sup-icon">🤝</div>
+        <div class="sup-label">사용법 및 장애</div>
+        <div class="sup-by">렛미업 <span class="plus">+</span> 스터디카페 연합회</div>
+        <p>사용법 안내와 장애 대응은 렛미업과 스터디카페 연합회가 함께, 상시로 도와드립니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 변경과정 4단계 ===== -->
+<section class="section change" id="change">
+  <div class="container">
+    <div class="section-head center">
+      <span class="section-tag">How to Switch</span>
+      <h2 class="section-title">키오스크 변경,<br>4단계면 끝납니다</h2>
+      <p class="section-sub">채팅으로 시작해서 설치일까지 — <span class="kw">언제든 취소 가능</span>합니다.</p>
+    </div>
+    <div class="chg-steps">
+      <div class="chg-step reveal">
+        <div class="chg-num">01</div>
+        <h3>채널톡으로 시작</h3>
+        <p><strong>매장 주소</strong>와 <strong>키오스크 사진</strong>을 채널톡으로 보내주세요.</p>
+        <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="chg-action" data-cta="change_channeltalk">채널톡 열기 <span class="chg-arrow">→</span></a>
+      </div>
+      <div class="chg-step reveal">
+        <div class="chg-num">02</div>
+        <h3>입퇴실 방식 알려주기</h3>
+        <p>회원 <strong>입장·퇴장 방법</strong>을 알려주세요. (지문·얼굴·비밀번호·자동문 등)</p>
+        <div class="chg-branch">
+          <div class="chg-branch-q">지금 입퇴실, 어떻게 하고 계세요?</div>
+          <div class="chg-branch-tabs">
+            <button type="button" data-branch="fp" class="active">🔒 지문인식기 써요</button>
+            <button type="button" data-branch="no">📱 지문 없어요</button>
+          </div>
+          <div class="chg-branch-body" data-branch-body="fp">
+            괜찮아요. 더 편한 <strong>얼굴인식</strong>으로 업그레이드해 드립니다. 회원은 첫 방문 때 <strong>1회 얼굴 등록</strong>이면 끝, 지문인식기 관리 부담도 사라집니다.
+            <span class="chg-branch-tag">✔ 얼굴인식으로 업그레이드 권장</span>
+          </div>
+          <div class="chg-branch-body" data-branch-body="no" hidden>
+            <strong>얼굴인식 + 모바일 QR</strong>로 바로 시작합니다. 추가 장비 <strong>0원</strong>, 태블릿 키오스크에 모두 내장돼 있어요.
+            <span class="chg-branch-tag">✔ 하드웨어 추가 없이 시작</span>
+          </div>
+        </div>
+      </div>
+      <div class="chg-step reveal">
+        <div class="chg-num">03</div>
+        <h3>결제</h3>
+        <p><strong>태블릿 키오스크 + 출장 설치비</strong>를 결제해 주세요.</p>
+        <a href="https://naver.me/GxrDBykV" target="_blank" rel="noopener" class="chg-action" data-cta="change_payment">결제하기 <span class="chg-arrow">→</span></a>
+      </div>
+      <div class="chg-step reveal">
+        <div class="chg-num">04</div>
+        <h3>해피콜 → 설치 확정</h3>
+        <p><strong>해피콜</strong> 후 설치 일정을 확정합니다.</p>
+        <span class="chg-cancel">🛟 언제든 취소 가능</span>
+      </div>
+    </div>
+    <div class="chg-cta">
+      <a href="https://letmeup.channel.io" target="_blank" rel="noopener" data-cta="change_start">지금 채널톡으로 시작하기 <span class="chg-arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<script>
+// ===== 변경과정 입퇴실 분기 토글 =====
+(function(){
+  var scope = document.getElementById('change');
+  if (!scope) return;
+  var tabs = scope.querySelectorAll('.chg-branch-tabs button');
+  var bodies = scope.querySelectorAll('[data-branch-body]');
+  tabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var key = btn.getAttribute('data-branch');
+      tabs.forEach(function(b){ b.classList.toggle('active', b === btn); });
+      bodies.forEach(function(body){
+        body.hidden = body.getAttribute('data-branch-body') !== key;
+      });
+    });
+  });
+})();
+</script>
+
 <section class="section faq">
   <div class="container">
     <div class="section-head center">
@@ -2409,6 +2944,112 @@ document.addEventListener('DOMContentLoaded', function(){
     </a>
   </div>
 </div>
+
+<!-- ===== 팝업 배너 모달 =====
+     문구·링크만 아래에서 직접 수정하면 됩니다.
+     - 노출 지연: data-delay(ms)  ·  "오늘 하루 보지 않기" 저장 기간: data-hide-days -->
+<div class="pb-overlay" id="promoBanner" role="dialog" aria-modal="true" aria-labelledby="pbTitle" aria-hidden="true" data-delay="1200" data-hide-days="1">
+  <div class="pb-card">
+    <button class="pb-close" type="button" aria-label="닫기" data-pb-close>&times;</button>
+    <div class="pb-visual">
+      <span class="pb-eyebrow">LETMEUP</span>
+      <p class="pb-title" id="pbTitle">지금 쓰는 키오스크,<br><span class="pb-hl">도입비 0원</span>으로 바꾸세요</p>
+    </div>
+    <div class="pb-body">
+      <p class="pb-desc">
+        도입비·결제 수수료·업데이트까지 —<br>
+        <strong>사장님이 매달 손해 보던 것만</strong> 다시 설계했습니다.
+      </p>
+      <div class="pb-actions">
+        <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="pb-btn pb-btn-primary" data-cta="banner_consult">
+          무료 상담 받기 <span class="pb-arrow">→</span>
+        </a>
+        <a href="#change" class="pb-btn pb-btn-secondary" data-cta="banner_change" data-pb-scroll>
+          📋 변경과정 4단계 보기
+        </a>
+      </div>
+    </div>
+    <div class="pb-footer">
+      <label class="pb-dismiss">
+        <input type="checkbox" data-pb-dismiss> 오늘 하루 보지 않기
+      </label>
+      <button class="pb-footer-close" type="button" data-pb-close>닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 팝업 배너 모달 제어 =====
+(function(){
+  var overlay = document.getElementById('promoBanner');
+  if (!overlay) return;
+
+  var STORE_KEY = 'letmeup_banner_hidden_until';
+  var delay = parseInt(overlay.getAttribute('data-delay') || '1000', 10);
+  var hideDays = parseInt(overlay.getAttribute('data-hide-days') || '1', 10);
+  var dismissEl = overlay.querySelector('[data-pb-dismiss]');
+  var lastFocused = null;
+
+  function isHidden(){
+    try {
+      var until = parseInt(window.localStorage.getItem(STORE_KEY) || '0', 10);
+      return until && Date.now() < until;
+    } catch (e) { return false; }
+  }
+  function remember(){
+    try {
+      var until = Date.now() + hideDays * 24 * 60 * 60 * 1000;
+      window.localStorage.setItem(STORE_KEY, String(until));
+    } catch (e) {}
+  }
+
+  function open(){
+    lastFocused = document.activeElement;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    var firstBtn = overlay.querySelector('.pb-btn-primary');
+    if (firstBtn) firstBtn.focus();
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'banner_view', banner_id: 'promo_kiosk' });
+  }
+  function close(){
+    if (dismissEl && dismissEl.checked) remember();
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  overlay.addEventListener('click', function(e){
+    if (e.target === overlay || e.target.closest('[data-pb-close]')) close();
+  });
+  overlay.querySelectorAll('.pb-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ if (dismissEl) dismissEl.checked = true; remember(); });
+  });
+  // 페이지 내 앵커(변경과정 보기) → 모달 닫고 해당 섹션으로 스크롤
+  var scrollBtn = overlay.querySelector('[data-pb-scroll]');
+  if (scrollBtn) {
+    scrollBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      remember();
+      close();
+      var target = document.getElementById('change');
+      if (target) {
+        var top = target.getBoundingClientRect().top + window.scrollY - 70;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+    });
+  }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+  });
+
+  if (!isHidden()) {
+    window.setTimeout(open, delay);
+  }
+})();
+</script>
 
 </body>
 </html>
