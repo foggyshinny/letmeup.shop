@@ -2964,8 +2964,8 @@ document.addEventListener('DOMContentLoaded', function(){
         <a href="https://letmeup.channel.io" target="_blank" rel="noopener" class="pb-btn pb-btn-primary" data-cta="banner_consult">
           무료 상담 받기 <span class="pb-arrow">→</span>
         </a>
-        <a href="https://guide.letmeup.shop/experience" target="_blank" rel="noopener" class="pb-btn pb-btn-secondary" data-cta="banner_experience">
-          🖐️ 직접 체험해보기
+        <a href="#change" class="pb-btn pb-btn-secondary" data-cta="banner_change" data-pb-scroll>
+          📋 변경과정 4단계 보기
         </a>
       </div>
     </div>
@@ -3027,6 +3027,20 @@ document.addEventListener('DOMContentLoaded', function(){
   overlay.querySelectorAll('.pb-btn').forEach(function(btn){
     btn.addEventListener('click', function(){ if (dismissEl) dismissEl.checked = true; remember(); });
   });
+  // 페이지 내 앵커(변경과정 보기) → 모달 닫고 해당 섹션으로 스크롤
+  var scrollBtn = overlay.querySelector('[data-pb-scroll]');
+  if (scrollBtn) {
+    scrollBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      remember();
+      close();
+      var target = document.getElementById('change');
+      if (target) {
+        var top = target.getBoundingClientRect().top + window.scrollY - 70;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+    });
+  }
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape' && overlay.classList.contains('open')) close();
   });
